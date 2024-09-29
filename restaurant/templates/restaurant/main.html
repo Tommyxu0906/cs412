@@ -1,0 +1,27 @@
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <title>Welcome to Our Restaurant!</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{% url 'main' %}">Main Page</a> |
+            <a href="{% url 'order' %}">Order Page</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Welcome!</h1>
+        <img src="{{image}}" alt="Image" style="max-width: 100%; height: auto;">
+        <p>Welcome to <strong>BBQ chicken</strong>, Allston's best fried chicken restaurant!</p>
+    </main>
+
+    <footer>
+        <p>Page created by tommyxu@bu.edu.</p>
+        <p>Generated at: {{ current_time }}</p>
+    </footer>
+</body>
+</html>
+

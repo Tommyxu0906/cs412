@@ -1,0 +1,33 @@
+{% extends 'restaurant/base.html' %}
+
+{% block title %}Place Your Order{% endblock %}
+
+{% block content %}
+<h1>Place an Order</h1>
+
+<form method="POST" action="{% url 'confirmation' %}">
+    {% csrf_token %}
+    <h3>Please select how you want your Fried Chicken:</h3>
+    <label> <input type="checkbox" name="10boneless" value="10 Boneless"> 10 Boneless $10</label><br>
+    <label> <input type="checkbox" name="10wings" value="10 Wings"> 10 Wings $10</label><br>
+    <label> <input type="checkbox" name="20boneless" value="20 Boneless"> 20 Boneless $20</label><br>
+    <label> <input type="checkbox" name="20wings" value="20 Wings"> 20 Wings $20</label><br>
+
+    <h3>Today's special:</h3>
+    <label><input type="checkbox" name="kfood" value="Fried Rice"> Fried Rice $10</label><br>
+
+    <h3>Special Instructions</h3>
+    <textarea name="special_instructions" placeholder="Please share any special instructions"></textarea><br>
+
+    <h3>Customer Information</h3>
+    <label>Name: <input type="text" name="name" required></label><br><br>
+    <label>Phone: <input type="tel" name="phone" required></label><br><br>
+    <label>Email: <input type="email" name="email" required></label><br>
+
+    <h3>Place your order!</h3>
+    <button type="submit">Submit Order</button>
+</form>
+{% endblock %}
+
+
+

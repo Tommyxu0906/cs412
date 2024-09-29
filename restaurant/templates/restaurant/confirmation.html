@@ -1,0 +1,42 @@
+{% extends 'restaurant/base.html' %}
+
+{% block content %}
+<html lang="en">
+<body>
+    <main>
+        <h1>BBQ Chicken</h1>
+        <h2>Order Confirmation</h2>
+        <p>Thank you for your order, {{ customer_name }}!</p>
+        <p><strong>Your order will be ready at:</strong> {{ ready_time }}</p>
+
+        <h3>Your Fried Chicken Selections:</h3>
+        <ul>
+            {% for item in fried_chicken %}
+                <li>{{ item }}</li>
+            {% empty %}
+                <li>No fried chicken selected</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Special Selection:</h3>
+        <p>{{ special }}</p>
+
+        <h3>Special Instructions:</h3>
+        <p>{{ special_instructions }}</p>
+
+        <h3>Total:</h3>
+        <p>${{ total }}</p>
+
+        <h3>Customer Information:</h3>
+        <p>Name: {{ customer_name }}</p>
+        <p>Phone: {{ customer_phone }}</p>
+        <p>Email: {{ customer_email }}</p>
+    </main>
+
+    <footer>
+        <p>Page created by tommyxu@bu.edu.</p>
+        <p>Generated at: {{ generated_time }}</p>
+    </footer>
+</body>
+</html>
+{% endblock %}
