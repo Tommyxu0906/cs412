@@ -1,0 +1,78 @@
+/* Basic body and header styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+}
+
+nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Style for content section */
+div {
+    padding: 20px;
+}
+
+/* Quote section styling */
+p {
+    font-size: 20px;
+    font-style: italic;
+    text-align: center;
+    color: #555;
+    margin: 20px 0;
+}
+
+/* Fixed Image Styling */
+img {
+    display: block;
+    margin: 20px auto;
+    width: 300px;  /* Fixed width */
+    height: 200px; /* Fixed height */
+    object-fit: cover; /* Ensures the image scales without distortion */
+    border-radius: 10px; /* Smooth corners for the images */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow for depth */
+}
+
+/* For the show_all page, display images in a grid */
+.image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.image-grid img {
+    width: 300px; /* Fixed width for all images in the grid */
+    height: 200px; /* Fixed height for all images in the grid */
+    object-fit: cover; /* Keeps images from distorting while scaling */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    img {
+        width: 100%; /* For smaller screens, allow images to scale to full width */
+        height: auto; /* Height will adjust accordingly */
+    }
+
+    .image-grid img {
+        width: 100%;
+        height: auto;
+    }
+}
