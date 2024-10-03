@@ -1,0 +1,19 @@
+<h1>Show all articles</h1>
+
+
+{{articles}}
+
+
+<div>
+    {% for a in articles%}
+    <div>
+        <h2>{{a.title}}</h2>
+        <h3>{{a.author}} at {{a.published}}</h3>
+    </div>
+
+    <img src="{{a.image_url}}" alt="{{a.image_url}}">
+
+    <p>{{a.text}}</p>
+
+</div>
+{% endfor %}
