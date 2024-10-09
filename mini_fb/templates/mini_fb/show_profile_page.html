@@ -1,0 +1,28 @@
+{% extends 'mini_fb/base.html' %}
+
+{% block content %}
+    <div class="profile-container" style="text-align: center;">
+        <h2>{{ profile.first_name }} {{ profile.last_name }} 's Profile</h2>
+        <div class="profile-image" style="margin: auto; display: inline-block;">
+            <img src="{{ profile.profile_image_url }}" alt="{{ profile.username }}'s Profile Image" style="max-width: 500px; height: 300px;">
+        </div>
+    <table>
+        <tr>
+            <th>First Name:</th>
+            <td>{{ profile.first_name }}</td>
+        </tr>
+        <tr>
+            <th>Last Name:</th>
+            <td>{{ profile.last_name }}</td>
+        </tr>
+        <tr>
+            <th>City:</th>
+            <td>{{ profile.city }}</td>
+        </tr>
+        <tr>
+            <th>Email:</th>
+            <td>{{ profile.email }}</td>
+        </tr>
+    </table>
+    <p><a href="{% url 'show_all_profiles' %}">Back to all profiles</a></p>
+{% endblock %}
