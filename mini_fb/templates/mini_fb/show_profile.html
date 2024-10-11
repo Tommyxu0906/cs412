@@ -1,6 +1,7 @@
 {% extends 'mini_fb/base.html' %}
 
 {% block content %}
+<!-- individual profile view -->
     <div class="profile-container" style="text-align: center;">
         <h2>{{ profile.first_name }} {{ profile.last_name }} 's Profile</h2>
         <div class="profile-image" style="margin: auto; display: inline-block;">
@@ -26,14 +27,16 @@
     </table>
     <a href="{% url 'create_status' profile.pk %}">Post a new status</a>
     <br>
+
+    <!-- Displays status message -->
     <h2>Status Messages:</h2>
-<ul>
-    {% for status in profile.statusmessage_set.all %}
-        <li>{{ status.message }}</li>
-    {% empty %}
+    <ul>
+        {% for status in profile.status_messages.all %}
+        <h3>{{ status.message }}</h3>
+        {% empty %}
         <p>No status messages yet.</p>
-    {% endfor %}
-</ul>
+        {% endfor %}
+    </ul>
 
     <p><a href="{% url 'show_all_profiles' %}">Back to all profiles</a></p>
 {% endblock %}

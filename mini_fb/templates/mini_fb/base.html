@@ -51,6 +51,14 @@
             margin-bottom: 1%;
             width: 100%;
         }
+        
+        h2 {
+            text-align: center;
+        }
+
+        h3 {
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -61,7 +69,7 @@
     </header>
     <div>
         {% block content %}{% endblock %}
-        <h2><a href="{% url 'create_profile' %}">Create a New Profile</a></h2>
+        <h3><a href="{% url 'create_profile' %}">Create a New Profile</a></h3>
     </div>
 
     <footer>
