@@ -26,8 +26,9 @@ class Profile(models.Model):
 class StatusMessage(models.Model):
     '''status message class for mini_fb'''
     timestamp = models.DateTimeField(default=timezone.now)
-    message = models.TextField(blank=True)
+    message = models.TextField()
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='status_messages')
+
 
     def __str__(self):
         return f"{self.profile.first_name} {self.profile.last_name}: {self.message[:20]}..."
