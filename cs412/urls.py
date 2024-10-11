@@ -24,5 +24,6 @@ urlpatterns = [
     path("restaurant/", include('restaurant.urls')),
     path("blog/", include('blog.urls')),
     path('mini_fb/', include('mini_fb.urls')),
+    path('', include('mini_fb.urls')),
 ]
 
