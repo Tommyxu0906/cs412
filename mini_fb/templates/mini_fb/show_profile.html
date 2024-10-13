@@ -32,7 +32,7 @@
     <h2>Status Messages:</h2>
     <ul>
         {% for status in profile.status_messages.all %}
-        <h3>{{ status.message }}</h3>
+        <h4>{{ status.message }}   {{ status.timestamp }}</h4>
         {% empty %}
         <p>No status messages yet.</p>
         {% endfor %}
