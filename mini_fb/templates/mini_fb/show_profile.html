@@ -33,6 +33,9 @@
     <ul>
         {% for status in profile.status_messages.all %}
         <h4>{{ status.message }}   {{ status.timestamp }}</h4>
+        {% for img in status.get_images %}
+            <img src="{{ img.image_file.url }}" alt="Image for status message">
+        {% endfor %}
         {% empty %}
         <p>No status messages yet.</p>
         {% endfor %}

@@ -5,7 +5,6 @@ from django.utils import timezone
 from django.urls import reverse
 # Create your models here.
 
-
 class Profile(models.Model):
     '''profile class defines attributes of each profile'''
     first_name = models.TextField(blank=False)
@@ -21,7 +20,7 @@ class Profile(models.Model):
         return StatusMessage.objects.filter(profile=self).order_by('-timestamp')
     
     def get_absolute_url(self):
-        return reverse('show_profile_page', kwargs={'pk': self.pk})
+        return reverse('show_profile', kwargs={'pk': self.pk})
 
 class StatusMessage(models.Model):
     '''status message class for mini_fb'''
@@ -29,6 +28,18 @@ class StatusMessage(models.Model):
     message = models.TextField()
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='status_messages')
 
-
     def __str__(self):
         return f"{self.profile.first_name} {self.profile.last_name}: {self.message[:20]}..."
+    
+    '''method to get image'''
+    def get_images(self):
+        return Image.objects.filter(status_message=self)
+
+#image model
+class Image(models.Model):
+    image_file = models.ImageField(upload_to='images/')
+    status_message = models.ForeignKey(StatusMessage, on_delete=models.CASCADE)
+    uploaded_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Image for {self.status_message}"
