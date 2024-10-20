@@ -6,9 +6,11 @@ from django.views.generic import DetailView
 from django.urls import reverse
 from django.views.generic.edit import CreateView
 from .forms import CreateProfileForm
-from django.shortcuts import get_object_or_404
-from .models import StatusMessage, Profile
+from django.shortcuts import get_object_or_404, redirect
+from .models import StatusMessage, Profile,  Image
 from .forms import CreateStatusMessageForm
+from django.utils import timezone
+
 # Create your views here.
 
 class ShowAllProfilesView(ListView):
@@ -43,7 +45,7 @@ class CreateStatusMessageView(CreateView):
     model = StatusMessage
     form_class = CreateStatusMessageForm
     template_name = 'mini_fb/create_status_form.html'
-    
+
     # Add the profile object to the context
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -53,10 +55,28 @@ class CreateStatusMessageView(CreateView):
 
     # Attach the profile to the status message before saving
     def form_valid(self, form):
+        # Get the profile using the primary key from the URL
         profile = get_object_or_404(Profile, pk=self.kwargs['pk'])
-        form.instance.profile = profile
-        return super().form_valid(form)
 
+        # Save the form but do not commit yet, to add the profile manually
+        sm = form.save(commit=False)
+        sm.profile = profile  # Associate the status message with the profile
+        sm.save()  # Now save it to the database
+
+        # Read the uploaded files from the form
+        files = self.request.FILES.getlist('files')
+
+        # Loop through each uploaded file and create an Image object
+        for file in files:
+            image = Image(
+                image_file=file,  # Set the uploaded file
+                status_message=sm,  # Associate with the newly created status message
+                uploaded_at=timezone.now()
+            )
+            image.save()  # Save the image to the database
+
+        # Redirect to the profile page or any other relevant page
+        return redirect('show_profile', pk=profile.pk)
 
     # Redirect to the profile page after the form is successfully submitted
     def get_success_url(self):

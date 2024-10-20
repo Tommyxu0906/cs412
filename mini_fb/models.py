@@ -39,7 +39,7 @@ class StatusMessage(models.Model):
 class Image(models.Model):
     image_file = models.ImageField(upload_to='images/')
     status_message = models.ForeignKey(StatusMessage, on_delete=models.CASCADE)
-    uploaded_at = models.DateTimeField(default=timezone.now)
+    uploaded_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Image for {self.status_message}"

@@ -3,11 +3,11 @@
 {% block content %}
     <h1>Post a status message for {{ profile.first_name }} {{ profile.last_name }}</h1>
     <!-- gets input for new status -->
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
+        <input type="file" name="files" multiple />
         <button type="submit">Create Status</button>
         <a href="{% url 'show_profile' profile.pk %}">Cancel</a>
-        
     </form>
 {% endblock %}
