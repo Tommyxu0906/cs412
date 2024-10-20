@@ -25,7 +25,12 @@
             <td>{{ profile.email }}</td>
         </tr>
     </table>
-    <a href="{% url 'create_status' profile.pk %}">Post a new status</a>
+
+    <table>
+        <td><p><a href="{% url 'update_profile' pk=profile.pk %}">Update Profile</a></p></td>
+        <td><p><a href="{% url 'create_status' profile.pk %}">Post a new status</a></p></td>
+    </table>
+    
     <br>
 
     <!-- Displays status message -->
@@ -40,6 +45,7 @@
         <p>No status messages yet.</p>
         {% endfor %}
     </ul>
-
+    
     <p><a href="{% url 'show_all_profiles' %}">Back to all profiles</a></p>
+    
 {% endblock %}
