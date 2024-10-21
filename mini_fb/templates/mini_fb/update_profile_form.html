@@ -5,8 +5,8 @@
   <form method="post" style="text-align: center;">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" style = "padding: 3px;">Update Profile</button>
+    <button type="submit" style = "padding: 3px;" style="text-align: center;">Update Profile</button>
   </form>
-  <h3><a href="{% url 'show_profile' pk=object.pk %}">Cancel</a></h3>
+  <h3><a href="{% url 'show_profile' pk=object.pk %}" style="text-align: center;">Cancel</a></h3>
   
 {% endblock %}

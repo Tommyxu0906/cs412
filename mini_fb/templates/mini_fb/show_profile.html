@@ -37,14 +37,24 @@
     <h2>Status Messages:</h2>
     <ul>
         {% for status in profile.status_messages.all %}
-        <h4>{{ status.message }}   {{ status.timestamp }}</h4>
+        <h4>{{ status.message }} ({{ status.timestamp }})</h4>
         {% for img in status.get_images %}
             <img src="{{ img.image_file.url }}" alt="Image for status message" style="max-width: 500px; height: 300px;">
+            <br>
+            <br>
         {% endfor %}
+        
+        <button><a href="{% url 'delete_status' pk=status.pk %}">Delete</a></button>
+        <button><a href="{% url 'update_status' pk=status.pk %}">Update</a></button>
+        
+
         {% empty %}
         <p>No status messages yet.</p>
+
+
         {% endfor %}
     </ul>
+
     
     <p><a href="{% url 'show_all_profiles' %}">Back to all profiles</a></p>
     
