@@ -28,6 +28,23 @@ class Profile(models.Model):
         friends_as_profile2 = Friend.objects.filter(profile2=self).values_list('profile1', flat=True)
         friend_ids = list(friends_as_profile1) + list(friends_as_profile2)
         return Profile.objects.filter(id__in=friend_ids)
+    
+    def add_friend(self, other):
+        # Check if the friend relationship already exists
+        if not Friend.objects.filter(
+            models.Q(profile1=self, profile2=other) | 
+            models.Q(profile1=other, profile2=self)
+        ).exists():
+            # Create a new Friend instance
+            Friend.objects.create(profile1=self, profile2=other, timestamp=timezone.now())
+
+    def get_friend_suggestions(self):
+        current_friends = self.get_friends()
+        return Profile.objects.exclude(
+            models.Q(id=self.id) | models.Q(id__in=[friend.id for friend in current_friends])
+        )
+
+
 
 class StatusMessage(models.Model):
     '''status message class for mini_fb'''

@@ -32,15 +32,26 @@
     </table>
     
     <br>
-
-    <h2>Friends:</h2>
     <ul>
-    {% for friends1 in profile.get_friends %}
-        <li><a href="{% url 'show_profile' friend.pk %}">{{ friend.first_name }} {{ friend.last_name }}</a></li>
-    {% empty %}
+
+    <table>
+        <thead><h3>Friends</h3></thead>
+            {% for friend in profile.get_friends %}
+            <tr>
+            <td><a href="{% url 'show_profile' friend.pk %}">{{ friend.first_name }} {{ friend.last_name }}</a></td>
+            <td><img src="{{ friend.profile_image_url }}" alt="{{ friend.name }}" style="max-width: 400px; height: 250px; border-radius: 10%;"></td>
+            </tr>
+
+            {% empty %}
         <p>No friends yet.</p>
-    {% endfor %}
+        {% endfor %}
+    </table>
+    
+    
     </ul>
+
+    <a href="{% url 'friend_suggestions' pk=profile.pk %}">Friend Suggestions</a>
+
 
     <!-- Displays status message -->
     <h2>Status Messages:</h2>
