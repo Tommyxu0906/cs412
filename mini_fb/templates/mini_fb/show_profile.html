@@ -33,6 +33,15 @@
     
     <br>
 
+    <h2>Friends:</h2>
+    <ul>
+    {% for friends1 in profile.get_friends %}
+        <li><a href="{% url 'show_profile' friend.pk %}">{{ friend.first_name }} {{ friend.last_name }}</a></li>
+    {% empty %}
+        <p>No friends yet.</p>
+    {% endfor %}
+    </ul>
+
     <!-- Displays status message -->
     <h2>Status Messages:</h2>
     <ul>
