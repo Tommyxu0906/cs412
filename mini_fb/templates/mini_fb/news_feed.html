@@ -1,0 +1,37 @@
+<!-- news_feed.html -->
+
+{% extends 'mini_fb/base.html' %}
+
+{% block content %}
+<table>
+    <thead>
+        <h2>{{ profile.first_name }} {{profile.last_name}}'s News Feed</h2>
+
+    </thead>
+    
+    <tbody>
+        {% for status in news_feed %}
+        <tr>
+            <td>{% if status.profile.profile_image_url %}
+                <img src="{{ status.profile.profile_image_url }}" alt="{{ status.profile.name }}" style="width:60px; height:70px; border-radius:50%;" >
+            {% else %}
+                <img src="/static/default-profile-picture.jpg" alt="Default Profile Picture" width="50" height="50">
+            {% endif %}
+            <strong>{{ status.profile.first_name }} {{ status.profile.last_name }}</strong> - {{ status.timestamp }}
+            </td>
+            <td> <p>{{ status.message }}</p></td>
+            <td>{% for img in status.get_images %}
+                <img src="{{ img.image_file.url }}" alt="Image for status message" style="max-width: 300px; height: 250px;">
+            {% endfor %}</td>
+        </tr>
+        {% empty %}
+            <p>No recent activity from friends.</p>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><a href="{% url 'show_profile' pk=profile.pk %}">Back to Profile</a></p>
+
+
+
+{% endblock %}

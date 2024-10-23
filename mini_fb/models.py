@@ -43,6 +43,18 @@ class Profile(models.Model):
         return Profile.objects.exclude(
             models.Q(id=self.id) | models.Q(id__in=[friend.id for friend in current_friends])
         )
+    
+    def get_news_feed(self):
+        # Get status messages for this profile
+        own_statuses = StatusMessage.objects.filter(profile=self)
+
+        # Get status messages for friends
+        friends = self.get_friends()
+        friends_statuses = StatusMessage.objects.filter(profile__in=friends)
+
+        # Combine and sort by timestamp, most recent first
+        all_statuses = own_statuses.union(friends_statuses).order_by('-timestamp')
+        return all_statuses
 
 
 

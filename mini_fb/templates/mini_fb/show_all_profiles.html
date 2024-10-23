@@ -2,8 +2,8 @@
 
 {% block content %}
 <h2>All Profiles</h2>
+<h3><a href="{% url 'create_profile' %}">Create a New Profile</a></h3>
 <table>
-
     <thead>
         <tr>
             <th>First Name</th>
@@ -25,6 +25,5 @@
         </tr>
         {% endfor %}
     </tbody>
-    
 </table>
 {% endblock %}

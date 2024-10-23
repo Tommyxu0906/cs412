@@ -29,6 +29,7 @@
     <table>
         <td><p><a href="{% url 'update_profile' pk=profile.pk %}">Update Profile</a></p></td>
         <td><p><a href="{% url 'create_status' profile.pk %}">Post a new status</a></p></td>
+        <td><p><a href="{% url 'show_news_feed' pk=profile.pk %}">View News Feed</a></p></td>
     </table>
     
     <br>
@@ -39,9 +40,8 @@
             {% for friend in profile.get_friends %}
             <tr>
             <td><a href="{% url 'show_profile' friend.pk %}">{{ friend.first_name }} {{ friend.last_name }}</a></td>
-            <td><img src="{{ friend.profile_image_url }}" alt="{{ friend.name }}" style="max-width: 400px; height: 250px; border-radius: 10%;"></td>
+            <td><img src="{{ friend.profile_image_url }}" alt="{{ friend.name }}" style="max-width: 300px; max-height: 250px; border-radius: 10%;"></td>
             </tr>
-
             {% empty %}
         <p>No friends yet.</p>
         {% endfor %}
