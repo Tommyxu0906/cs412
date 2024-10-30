@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect
 from .models import *
 from .forms import *
 from django.utils import timezone
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
@@ -30,7 +31,7 @@ class ShowProfilePageView(DetailView):
         context['profile'] = profile
         return context
 
-class CreateProfileView(CreateView):
+class CreateProfileView(LoginRequiredMixin, CreateView):
     # creates view for creating new profile
     model = Profile
     form_class = CreateProfileForm
@@ -78,7 +79,7 @@ class CreateStatusMessageView(CreateView):
     def get_success_url(self):
         return reverse('show_profile', kwargs={'pk': self.kwargs['pk']})
     
-class UpdateProfileView(UpdateView):
+class UpdateProfileView(LoginRequiredMixin, UpdateView):
     model = Profile
     form_class = UpdateProfileForm
     template_name = 'mini_fb/update_profile_form.html'

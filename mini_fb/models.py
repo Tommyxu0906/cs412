@@ -3,6 +3,7 @@
 from django.db import models
 from django.utils import timezone
 from django.urls import reverse
+from django.contrib.auth.models import User
 # Create your models here.
 
 class Profile(models.Model):
@@ -12,6 +13,8 @@ class Profile(models.Model):
     city = models.TextField(blank=False)
     email = models.TextField(blank=False)
     profile_image_url = models.URLField(blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
     '''str method'''
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
@@ -43,7 +46,7 @@ class Profile(models.Model):
         return Profile.objects.exclude(
             models.Q(id=self.id) | models.Q(id__in=[friend.id for friend in current_friends])
         )
-    
+
     def get_news_feed(self):
         # Get status messages for this profile
         own_statuses = StatusMessage.objects.filter(profile=self)
