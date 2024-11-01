@@ -53,34 +53,25 @@ class CreateProfileView(FormView):
         profile_form = CreateProfileForm(request.POST)
         
         if user_form.is_valid() and profile_form.is_valid():
-            # Save User
             user = user_form.save()
             
             # Prepare Profile
             profile = profile_form.save(commit=False)
-            profile.user = user  # Link profile to the new user
+            profile.user = user
             
             # Debug before saving profile
             print("Profile about to be saved:", profile)
             
-            profile.save()  # Save profile to the database
-            
-            # Log user in
+            profile.save()
             login(request, user)
-            
-            # Debugging output
-            print("Profile successfully saved with ID:", profile.pk)
-            
             # Redirect to profile
             return redirect('show_profile', pk=profile.pk)
         else:
-            # Debug invalid form fields
             if not user_form.is_valid():
                 print("User form errors:", user_form.errors)
             if not profile_form.is_valid():
                 print("Profile form errors:", profile_form.errors)
             
-            # If invalid, re-render page with errors
             return self.form_invalid(profile_form)
 
     def get_success_url(self):
@@ -103,10 +94,8 @@ class CreateStatusMessageView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # Get the profile using the primary key from the URL
         profile = get_object_or_404(Profile, user=self.request.user)
-
-        # Save the form but do not commit yet, to add the profile manually
         sm = form.save(commit=False)
-        sm.profile = profile  # Associate the status message with the profile
+        sm.profile = profile  #
         sm.save()
 
         files = self.request.FILES.getlist('files')
@@ -114,7 +103,7 @@ class CreateStatusMessageView(LoginRequiredMixin, CreateView):
         for file in files:
             image = Image(
                 image_file=file,
-                status_message=sm,  # Associate with the newly created status message
+                status_message=sm,
                 uploaded_at=timezone.now()
             )
             image.save()
