@@ -14,7 +14,7 @@
         <tbody>
             {% for suggestion in friend_suggestions %}
             <tr>
-                <td><a href="{% url 'add_friend' pk=profile.pk other_pk=suggestion.pk %}">{{suggestion.first_name}} {{suggestion.last_name}}</a></td>
+                <td><a href="{% url 'add_friend' other_pk=suggestion.pk %}">{{suggestion.first_name}} {{suggestion.last_name}}</a></td>
                 <td><img src="{{ suggestion.profile_image_url }}" alt="{{ suggestion.name }}"  style="max-width: 400px; height: 250px; border-radius: 10%;">
                 </td>
             </tr>

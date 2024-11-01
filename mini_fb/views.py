@@ -9,7 +9,9 @@ from .models import *
 from .forms import *
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.contrib.auth.forms import UserCreationForm
+from django.views.generic.edit import FormView
+from django.contrib.auth import login
 # Create your views here.
 
 class ShowAllProfilesView(ListView):
@@ -30,15 +32,60 @@ class ShowProfilePageView(DetailView):
         profile = get_object_or_404(Profile, pk=self.kwargs['pk'])
         context['profile'] = profile
         return context
+    
 
-class CreateProfileView(CreateView):
-    # creates view for creating new profile
-    model = Profile
-    form_class = CreateProfileForm
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+
+@method_decorator(csrf_protect, name='dispatch')
+class CreateProfileView(FormView):
     template_name = 'mini_fb/create_profile_form.html'
+    form_class = CreateProfileForm
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if 'user_form' not in context:
+            context['user_form'] = UserCreationForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        user_form = UserCreationForm(request.POST)
+        profile_form = CreateProfileForm(request.POST)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            # Save User
+            user = user_form.save()
+            
+            # Prepare Profile
+            profile = profile_form.save(commit=False)
+            profile.user = user  # Link profile to the new user
+            
+            # Debug before saving profile
+            print("Profile about to be saved:", profile)
+            
+            profile.save()  # Save profile to the database
+            
+            # Log user in
+            login(request, user)
+            
+            # Debugging output
+            print("Profile successfully saved with ID:", profile.pk)
+            
+            # Redirect to profile
+            return redirect('show_profile', pk=profile.pk)
+        else:
+            # Debug invalid form fields
+            if not user_form.is_valid():
+                print("User form errors:", user_form.errors)
+            if not profile_form.is_valid():
+                print("Profile form errors:", profile_form.errors)
+            
+            # If invalid, re-render page with errors
+            return self.form_invalid(profile_form)
 
     def get_success_url(self):
-        return reverse('show_profile', kwargs={'pk': self.object.pk})
+        return reverse('show_all_profiles')
+
     
 class CreateStatusMessageView(LoginRequiredMixin, CreateView):
     model = StatusMessage
@@ -133,15 +180,20 @@ class CreateFriendView(LoginRequiredMixin, View):
     
     def get_object(self):
         return get_object_or_404(Profile, user=self.request.user)
-    
-class ShowFriendSuggestionsView(DetailView):
+
+class ShowFriendSuggestionsView(LoginRequiredMixin, DetailView):
     model = Profile
     template_name = 'mini_fb/friend_suggestions.html'
     context_object_name = 'profile'
 
+    def get_object(self):
+        # Fetch the Profile linked to the current user
+        return get_object_or_404(Profile, user=self.request.user)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['friend_suggestions'] = self.object.get_friend_suggestions()
+        # Add friend suggestions to the context
+        context['friend_suggestions'] = self.get_object().get_friend_suggestions()
         return context
 
 class ShowNewsFeedView(LoginRequiredMixin, DetailView):
