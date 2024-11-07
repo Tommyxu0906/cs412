@@ -19,8 +19,6 @@ class Voter(models.Model):
     date_of_registration = models.DateField()
     party_affiliation = models.CharField(max_length=50)
     precinct_number = models.CharField(max_length=2)
-    
-    # Participation in recent elections
     v20state = models.BooleanField(default=False)
     v21town = models.BooleanField(default=False)
     v21primary = models.BooleanField(default=False)
@@ -54,14 +52,13 @@ def load_data(csv_path='newton_voters.csv'):
                 date_of_registration=parse_date(row['Date of Registration']),
                 party_affiliation=row['Party Affiliation'],
                 precinct_number=row['Precinct Number'],
-                v20state=row['v20state'] == 'True',
-                v21town=row['v21town'] == 'True',
-                v21primary=row['v21primary'] == 'True',
-                v22general=row['v22general'] == 'True',
-                v23town=row['v23town'] == 'True',
+                v20state=(row['v20state'] == "TRUE"),
+                v21town=(row['v21town'] == "TRUE"),
+                v21primary=(row['v21primary'] == "TRUE"),
+                v22general=row['v22general'] == "TRUE",
+                v23town=row['v23town'] == "TRUE",
                 voter_score=int(row['voter_score'])
             )
             voter_objects.append(voter)
         
-        # Bulk create all Voter objects for efficiency
         Voter.objects.bulk_create(voter_objects)

@@ -1,8 +1,9 @@
-<!-- voter_analytics/templates/voter_analytics/voter_list.html -->
 {% extends "base.html" %}
 
 {% block content %}
 <h1>Voter List</h1>
+
+<a href="{% url 'graphs' %}">View Graphs</a>
 
 <!-- Filter Form -->
 <form method="get">

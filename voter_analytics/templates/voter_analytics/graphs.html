@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Voter Analytics Graphs</h1>
+
+<!-- Filter Form -->
+<form method="get">
+    <label for="party_affiliation">Party Affiliation:</label>
+    <select name="party_affiliation">
+        <option value="">All</option>
+        {% for party in party_affiliations %}
+        <option value="{{ party }}" {% if request.GET.party_affiliation == party %}selected{% endif %}>{{ party }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="min_dob">Born After:</label>
+    <select name="min_dob">
+        <option value="">Any</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if request.GET.min_dob == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="max_dob">Born Before:</label>
+    <select name="max_dob">
+        <option value="">Any</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if request.GET.max_dob == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="voter_score">Voter Score:</label>
+    <select name="voter_score">
+        <option value="">Any</option>
+        {% for score in voter_scores %}
+        <option value="{{ score }}" {% if request.GET.voter_score == score|stringformat:"s" %}selected{% endif %}>{{ score }}</option>
+        {% endfor %}
+    </select>
+
+    {% for election in elections %}
+    <label>
+        <input type="checkbox" name="{{ election }}" {% if request.GET.election %}checked{% endif %}>
+        Voted in {{ election }}
+    </label>
+    {% endfor %}
+
+    <button type="submit">Filter</button>
+</form>
+
+<!-- Graphs -->
+<h2>Voter distribution by Year of Birth</h2>
+<div>{{ birth_year_histogram|safe }}</div>
+
+<h2>Voter distribution by Party Affiliation</h2>
+<div>{{ party_pie|safe }}</div>
+
+<h2>Vote Count by Election</h2>
+<div>{{ election_histogram|safe }}</div>
+{% endblock %}
