@@ -1,0 +1,96 @@
+<!-- voter_analytics/templates/voter_analytics/voter_list.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Voter List</h1>
+
+<!-- Filter Form -->
+<form method="get">
+    <label for="party_affiliation">Party Affiliation:</label>
+    <select name="party_affiliation">
+        <option value="">All</option>
+        {% for party in party_affiliations %}
+        <option value="{{ party }}" {% if request.GET.party_affiliation == party %}selected{% endif %}>{{ party }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="min_dob">Born After:</label>
+    <select name="min_dob">
+        <option value="">Any</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if request.GET.min_dob == year|stringformat:'s' %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="max_dob">Born Before:</label>
+    <select name="max_dob">
+        <option value="">Any</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if request.GET.max_dob == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="voter_score">Voter Score:</label>
+    <select name="voter_score">
+        <option value="">Any</option>
+        {% for score in voter_scores %}
+        <option value="{{ score }}" {% if request.GET.voter_score == score|stringformat:"s" %}selected{% endif %}>{{ score }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Checkboxes for each election participation -->
+    {% for election in elections %}
+    <label>
+        <input type="checkbox" name="{{ election }}" {% if request.GET.election %}checked{% endif %}>
+        Voted in {{ election }}
+    </label>
+    {% endfor %}
+
+    <button type="submit">Filter</button>
+</form>
+
+<!-- Voter List Table -->
+<table>
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Address</th>
+        <th>Date of Birth</th>
+        <th>Party</th>
+        <th>Score</th>
+        <th>Details</th>
+    </tr>
+    {% for voter in voters %}
+    <tr>
+        <td>{{ voter.first_name }}</td>
+        <td>{{ voter.last_name }}</td>
+        <td>{{ voter.street_number }} {{ voter.street_name }}</td>
+        <td>{{ voter.date_of_birth }}</td>
+        <td>{{ voter.party_affiliation }}</td>
+        <td>{{ voter.voter_score }}</td>
+        <td><a href="{% url 'voter' voter.pk %}">View Details</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Pagination Controls -->
+{% if is_paginated %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if request.GET %}&amp;{% endif %}{{ request.GET.urlencode }}">« first</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&amp;{% endif %}{{ request.GET.urlencode }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET %}&amp;{% endif %}{{ request.GET.urlencode }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET %}&amp;{% endif %}{{ request.GET.urlencode }}">last »</a>
+            {% endif %}
+        </span>
+    </div>
+{% endif %}
+{% endblock %}
