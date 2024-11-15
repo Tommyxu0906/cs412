@@ -1,0 +1,22 @@
+{% extends 'project/base.html' %}
+
+{% block title %}Home - Project eBay{% endblock %}
+
+{% block content %}
+    <h2>All Listings</h2>
+    <div class="listing-cards">
+        {% for listing in listings %}
+            <div class="card">
+                <a href="{% url 'listing_detail' listing.pk %}">
+                    {% if listing.image %}
+                        <img src="{{ listing.image.url }}" alt="{{ listing.name }}" class="listing-image">
+                    {% endif %}
+                </a>
+                <div class="card-details">
+                    <h3><a href="{% url 'listing_detail' listing.pk %}">{{ listing.name }}</a></h3>
+                    <p>Price: ${{ listing.price }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

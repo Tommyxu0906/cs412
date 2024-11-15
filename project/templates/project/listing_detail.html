@@ -1,0 +1,39 @@
+{% extends 'project/base.html' %}
+
+{% block title %}Listing Details - Project eBay{% endblock %}
+
+{% block content %}
+    <div class="listing-detail-container">
+        <!-- Display large image -->
+        {% if listing.image %}
+            <img src="{{ listing.image.url }}" alt="{{ listing.name }}" class="large-listing-image">
+        {% endif %}
+
+        <!-- Listing details in a table format -->
+        <div class="listing-info">
+            <h2>{{ listing.name }}</h2>
+            <table class="listing-details-table">
+                <tr>
+                    <th>Category</th>
+                    <td>{{ listing.category }}</td>
+                </tr>
+                <tr>
+                    <th>Price</th>
+                    <td>${{ listing.price }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{ listing.description }}</td>
+                </tr>
+                <tr>
+                    <th>Listed on</th>
+                    <td>{{ listing.created_at|date:"F d, Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Expires on</th>
+                    <td>{{ listing.expires_at|date:"F d, Y" }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{% endblock %}
