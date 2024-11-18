@@ -1,0 +1,21 @@
+{% extends 'project/base.html' %}
+
+{% block title %}Register - Project eBay{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <h2>Create an Account</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            {{ user_form.as_p }}
+        </div>
+        <div class="form-group">
+            {{ profile_form.as_p }}
+        </div>
+        
+        <button type="submit" class="btn">Register</button>
+    </form>
+</div>
+{% endblock %}

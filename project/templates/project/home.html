@@ -1,8 +1,26 @@
 {% extends 'project/base.html' %}
+{% load static %}
 
 {% block title %}Home - Project eBay{% endblock %}
 
 {% block content %}
+    <!-- Add user profile image and link -->
+    <div class="user-profile-header">
+        {% if user.is_authenticated %}
+            <a href="{% url 'user_profile' user.pk %}" class="user-profile-link">
+                {% if user.profile.profile_image %}
+                    <img src="{{ user.profile.profile_image.url }}" alt="{{ user.username }}" class="user-profile-image">
+                {% else %}
+                    <img src="{% static 'images/default_profile.jpg' %}" alt="{{ user.username }}" class="user-profile-image">
+                {% endif %}
+            </a>
+            <p>{{ user.username }}</p>
+        {% else %}
+            <p>Welcome, Guest! <a href="{% url 'login' %}">Log in</a></p>
+        {% endif %}
+    </div>
+
+    <!-- Listings Section -->
     <h2>All Listings</h2>
     <div class="listing-cards">
         {% for listing in listings %}

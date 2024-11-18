@@ -1,0 +1,32 @@
+{% extends 'project/base.html' %}
+
+{% block title %}User Profile - {{ user.username }}{% endblock %}
+
+{% block content %}
+    <div class="user-profile-container">
+        
+        <h2>{{ user.username }}'s Profile</h2>
+        <table class="user-profile-table">
+            <tr>
+                <th>Full Name</th>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ user.email }}</td>
+            </tr>
+            <tr>
+                <th>Username</th>
+                <td>{{ user.username }}</td>
+            </tr>
+            <tr>
+                <th>Date Joined</th>
+                <td>{{ user.date_joined|date:"F d, Y" }}</td>
+            </tr>
+            <tr>
+                <th>Last Login</th>
+                <td>{{ user.last_login|date:"F d, Y H:i" }}</td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}
