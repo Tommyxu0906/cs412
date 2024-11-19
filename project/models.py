@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -20,6 +21,20 @@ class Listing(models.Model):
     expires_at = models.DateTimeField() # Expiration timestamp for the listing
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")  # Link to User
     sold = models.BooleanField(default=False)  # Track sold status
+
+    def clean(self):
+        # Validate the price field
+        if self.price is None:
+            raise ValidationError("There's a problem with your listing")
+        if self.price < 0:
+            raise ValidationError("Price cannot be negative.")
+        if self.price > 99999:
+            raise ValidationError("Price cannot exceed 99999.")
+
+    def save(self, *args, **kwargs):
+        # Call the clean method to validate the model before saving
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

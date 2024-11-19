@@ -49,8 +49,12 @@
         </div>
 
         <!-- Buy Now Button -->
+        {% if user.is_authenticated %}
         <div class="buy-now-container">
             <a href="{% url 'place_order' listing.id %}" class="btn btn-success">Buy Now</a>
         </div>
+        {% else %}
+            <p>Please Login or Register before buying</p>
+        {% endif %}
     </div>
 {% endblock %}

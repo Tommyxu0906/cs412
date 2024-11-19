@@ -464,7 +464,70 @@ h2 {
     text-decoration: underline;
 }
 
+.manage-listings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
 
+.manage-listings-table th, .manage-listings-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.manage-listings-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.manage-listings-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.manage-listings-table .btn {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+    text-decoration: none;
+}
+
+.edit-listing-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.edit-listing-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
 
 
     </style>
@@ -481,7 +544,7 @@ h2 {
             <p>Logged in as: {{user.username}} (<a href="{% url 'logout' %}">Logout</a>)</p>
             <a href="{% url 'create_listing' %}">Create Listing</a>
             <a href="{% url 'order_history' %}">Order History</a>
-
+            <a href="{% url 'manage_listings' %}">Manage My Listings</a>
             {% else %}
             <a href="{% url 'login' %}">Login</a>
             <a href="{% url 'register' %}">Register</a>

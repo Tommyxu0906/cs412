@@ -1,23 +1,24 @@
 from django.views import View
-from django.views.generic import DetailView, CreateView
+from django.views.generic import DetailView, CreateView, UpdateView
 from .models import *
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .forms import UserRegistrationForm, ProfileForm
+from .forms import *
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
 from django.http import HttpResponseForbidden
+from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 
 class CreateListingView(LoginRequiredMixin, CreateView):
     model = Listing
-    fields = ['name', 'description', 'price', 'image', 'category', 'expires_at']
+    form_class = ListingForm
     template_name = 'project/create_listing.html'
-    success_url = reverse_lazy('home')  # Redirect to home after creation
+    success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        # Assign the current user as the owner of the listing
         form.instance.user = self.request.user
         return super().form_valid(form)
 
@@ -153,3 +154,27 @@ class OrderHistoryView(View):
         orders = Order.objects.filter(buyer=request.user).order_by('-created_at')
         return render(request, 'project/order_history.html', {'orders': orders})
 
+class ManageListingsView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # Fetch listings created by the logged-in user
+        listings = Listing.objects.filter(user=request.user).order_by('-created_at')
+        return render(request, 'project/manage_listings.html', {'listings': listings})
+
+class EditListingView(LoginRequiredMixin, UpdateView):
+    model = Listing
+    fields = ['name', 'description', 'price', 'image', 'category', 'expires_at']
+    template_name = 'project/edit_listing.html'
+    success_url = '/listings/manage/'
+
+    def get_queryset(self):
+        # Ensure the user can only edit their own listings
+        return Listing.objects.filter(user=self.request.user)
+
+class DeleteListingView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        listing = get_object_or_404(Listing, pk=pk)
+        # Ensure the user can only delete their own listings
+        if listing.user != request.user:
+            return HttpResponseForbidden("You are not allowed to delete this listing.")
+        listing.delete()
+        return redirect('manage_listings')
