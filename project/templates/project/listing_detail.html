@@ -35,5 +35,22 @@
                 </tr>
             </table>
         </div>
+
+        <!-- Seller Information -->
+        <div class="seller-info">
+            <h3>Seller Information</h3>
+            <div class="seller-profile">
+                <a href="{% url 'user_profile' listing.user.id %}">
+                    <img src="{{ listing.user.profile.profile_image.url }}" alt="Seller Profile Image" class="seller-profile-image">
+                    <span class="seller-username">{{ listing.user.username }}</span>
+                </a>
+            </div>
+            <a href="mailto:{{ listing.user.email }}" class="btn btn-primary">Message Seller</a>
+        </div>
+
+        <!-- Buy Now Button -->
+        <div class="buy-now-container">
+            <a href="{% url 'place_order' listing.id %}" class="btn btn-success">Buy Now</a>
+        </div>
     </div>
 {% endblock %}

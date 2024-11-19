@@ -1,0 +1,47 @@
+{% extends 'project/base.html' %}
+
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+    <div class="order-history-container">
+        <h2>Your Order History</h2>
+        {% if orders %}
+            <table class="order-history-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Seller</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>
+                                <a href="{% url 'listing_detail' order.listing.id %}">
+                                    {{ order.listing.name }}
+                                </a>
+                            </td>
+                            <td>${{ order.listing.price }}</td>
+                            <td>{{ order.seller.username }}</td>
+                            <td>{{ order.created_at|date:"F d, Y" }}</td>
+                            <td>{{ order.status }}</td>
+                            <td>
+                                <a href="{% url 'listing_detail' order.listing.id %}">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>You have not purchased any items yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}

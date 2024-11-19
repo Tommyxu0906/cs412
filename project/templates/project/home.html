@@ -16,25 +16,50 @@
             </a>
             <p>{{ user.username }}</p>
         {% else %}
-            <p>Welcome, Guest! <a href="{% url 'login' %}">Log in</a></p>
+            <p>Welcome, Mini eBay user! <a href="{% url 'login' %}">Log in</a></p>
         {% endif %}
     </div>
 
+    <!-- Search and Filter Form -->
+    <form method="get" action="{% url 'home' %}" class="filter-form">
+        <input type="text" name="q" placeholder="Search listings..." value="{{ query }}" class="search-input">
+        
+        <select name="sort" class="sort-dropdown">
+            <option value="best_match" {% if sort_by == "best_match" %}selected{% endif %}>Best Match</option>
+            <option value="newly_listed" {% if sort_by == "newly_listed" %}selected{% endif %}>Time: Newly Listed</option>
+            <option value="ending_soon" {% if sort_by == "ending_soon" %}selected{% endif %}>Time: Ending Soon</option>
+            <option value="price_low_high" {% if sort_by == "price_low_high" %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_high_low" {% if sort_by == "price_high_low" %}selected{% endif %}>Price: High to Low</option>
+        </select>
+
+        <input type="number" name="min_price" placeholder="Min Price" value="{{ min_price }}" class="price-filter">
+        <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}" class="price-filter">
+
+        <button type="submit" class="filter-button">Apply Filters</button>
+    </form>
+
+    <!-- Display Result Count -->
+    <p>{{ result_count }} results found</p>
+
     <!-- Listings Section -->
     <h2>All Listings</h2>
-    <div class="listing-cards">
-        {% for listing in listings %}
-            <div class="card">
-                <a href="{% url 'listing_detail' listing.pk %}">
-                    {% if listing.image %}
-                        <img src="{{ listing.image.url }}" alt="{{ listing.name }}" class="listing-image">
-                    {% endif %}
-                </a>
-                <div class="card-details">
-                    <h3><a href="{% url 'listing_detail' listing.pk %}">{{ listing.name }}</a></h3>
-                    <p>Price: ${{ listing.price }}</p>
+    {% if listings %}
+        <div class="listing-cards">
+            {% for listing in listings %}
+                <div class="card">
+                    <a href="{% url 'listing_detail' listing.pk %}">
+                        {% if listing.image %}
+                            <img src="{{ listing.image.url }}" alt="{{ listing.name }}" class="listing-image">
+                        {% endif %}
+                    </a>
+                    <div class="card-details">
+                        <h3><a href="{% url 'listing_detail' listing.pk %}">{{ listing.name }}</a></h3>
+                        <p>Price: ${{ listing.price }}</p>
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No listings match your search.</p>
+    {% endif %}
 {% endblock %}

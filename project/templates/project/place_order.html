@@ -1,0 +1,16 @@
+{% extends 'project/base.html' %}
+
+{% block title %}Place Order - Project eBay{% endblock %}
+
+{% block content %}
+    <div class="place-order-container">
+        <h2>Confirm Your Order</h2>
+        <p><strong>Product:</strong> {{ order.listing.name }}</p>
+        <p><strong>Price:</strong> ${{ order.listing.price }}</p>
+        <p><strong>Seller:</strong> {{ order.seller.username }}</p>
+        <form method="post" action="{% url 'complete_order' order.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Pay Now</button>
+        </form>
+    </div>
+{% endblock %}

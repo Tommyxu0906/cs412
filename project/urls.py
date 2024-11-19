@@ -11,4 +11,8 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='project/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='project/logged_out.html'), name='logout'),
     path('register/', register, name='register'),
+    path('create-listing/', CreateListingView.as_view(), name='create_listing'),
+    path('order/place/<int:pk>/', PlaceOrderView.as_view(), name='place_order'),
+    path('order/complete/<int:pk>/', CompleteOrderView.as_view(), name='complete_order'),
+    path('order/history/', OrderHistoryView.as_view(), name='order_history'),
 ]

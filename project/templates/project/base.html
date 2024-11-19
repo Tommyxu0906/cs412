@@ -320,6 +320,151 @@ h2 {
     background-color: #555;
 }
 
+.create-listing-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.create-listing-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.create-listing-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-listing-container .btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    color: white;
+    background-color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.create-listing-container .btn:hover {
+    background-color: #555;
+}
+
+
+.seller-info {
+    margin-top: 20px;
+}
+.seller-profile {
+    display: flex;
+    align-items: center;
+}
+.seller-profile-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.seller-username {
+    font-weight: bold;
+}
+.btn {
+    margin-top: 10px;
+    display: inline-block;
+}
+
+
+.search-form {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-input {
+    padding: 10px;
+    font-size: 16px;
+    width: 300px;
+    margin-right: 10px;
+}
+
+.search-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #0056b3;
+}
+
+.filter-form {
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.search-input,
+.sort-dropdown,
+.price-filter,
+.filter-button {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.filter-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.filter-button:hover {
+    background-color: #0056b3;
+}
+
+.order-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.order-history-table th,
+.order-history-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.order-history-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.order-history-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.order-history-table a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.order-history-table a:hover {
+    text-decoration: underline;
+}
+
+
 
 
     </style>
@@ -334,6 +479,9 @@ h2 {
             <!-- Add more links as needed in the future -->
             {% if user.is_authenticated %}
             <p>Logged in as: {{user.username}} (<a href="{% url 'logout' %}">Logout</a>)</p>
+            <a href="{% url 'create_listing' %}">Create Listing</a>
+            <a href="{% url 'order_history' %}">Order History</a>
+
             {% else %}
             <a href="{% url 'login' %}">Login</a>
             <a href="{% url 'register' %}">Register</a>
