@@ -8,9 +8,8 @@ from .forms import *
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.core.exceptions import ValidationError
-from django.http import JsonResponse
 
 class CreateListingView(LoginRequiredMixin, CreateView):
     model = Listing
@@ -178,3 +177,48 @@ class DeleteListingView(LoginRequiredMixin, View):
             return HttpResponseForbidden("You are not allowed to delete this listing.")
         listing.delete()
         return redirect('manage_listings')
+
+class AddToCartView(LoginRequiredMixin, View):
+    def post(self, request, listing_id, *args, **kwargs):
+        listing = get_object_or_404(Listing, id=listing_id)
+
+        # Prevent adding sold items
+        if listing.sold:
+            return HttpResponseForbidden("This item has already been sold.")
+        
+        # Get or create the user's cart
+        cart, created = Cart.objects.get_or_create(user=request.user)
+
+        # Add item to the cart if not already present
+        if not CartItem.objects.filter(cart=cart, listing=listing).exists():
+            CartItem.objects.create(cart=cart, listing=listing)
+
+        return redirect('cart')
+
+
+class ViewCartView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        return render(request, 'project/cart.html', {'cart': cart})
+
+class RemoveFromCartView(LoginRequiredMixin, View):
+    def post(self, request, item_id, *args, **kwargs):
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+        cart_item.delete()
+        return redirect('cart')
+
+class CheckoutView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        cart = get_object_or_404(Cart, user=request.user)
+        items = cart.items.all()
+
+        # Mark all listings in the cart as sold
+        for item in items:
+            listing = item.listing
+            listing.sold = True
+            listing.save()
+
+        # Clear the cart after checkout
+        items.delete()
+
+        return redirect('home')  # Or a confirmation page

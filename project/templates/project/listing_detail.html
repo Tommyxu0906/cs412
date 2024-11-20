@@ -51,7 +51,18 @@
         <!-- Buy Now Button -->
         {% if user.is_authenticated %}
         <div class="buy-now-container">
-            <a href="{% url 'place_order' listing.id %}" class="btn btn-success">Buy Now</a>
+            
+
+            <form method="post" action="{% url 'place_order' listing.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Buy Now</button>
+            </form>
+
+            <!-- Add to Cart Button -->
+            <form method="post" action="{% url 'add_to_cart' listing.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Add to Cart</button>
+            </form>
         </div>
         {% else %}
             <p>Please Login or Register before buying</p>

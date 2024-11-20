@@ -1,0 +1,43 @@
+{% extends 'project/base.html' %}
+
+{% block title %}Your Cart{% endblock %}
+
+{% block content %}
+    <div class="cart-container">
+        <h2>Your Cart</h2>
+        {% if cart.items.exists %}
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart.items.all %}
+                        <tr>
+                            <td>{{ item.listing.name }}</td>
+                            <td>${{ item.listing.price }}</td>
+                            <td>
+                                <form method="post" action="{% url 'remove_from_cart' item.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="cart-total">
+                <p>Total Price: ${{ cart.total_price }}</p>
+                <form method="post" action="{% url 'checkout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Checkout</button>
+                </form>
+            </div>
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+    </div>
+{% endblock %}

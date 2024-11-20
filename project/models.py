@@ -49,3 +49,20 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id}: {self.listing.name} by {self.buyer.username}"
+
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Cart of {self.user.username}"
+
+    def total_price(self):
+        return sum(item.listing.price for item in self.items.all())
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    listing = models.ForeignKey('Listing', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.listing.name} in {self.cart.user.username}'s cart"

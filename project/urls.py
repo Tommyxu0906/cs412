@@ -18,6 +18,9 @@ urlpatterns = [
     path('listings/manage/', ManageListingsView.as_view(), name='manage_listings'),
     path('listings/edit/<int:pk>/', EditListingView.as_view(), name='edit_listing'),
     path('listings/delete/<int:pk>/', DeleteListingView.as_view(), name='delete_listing'),
+    path('cart/add/<int:listing_id>/', AddToCartView.as_view(), name='add_to_cart'),
+    path('cart/', ViewCartView.as_view(), name='cart'),
+    path('cart/remove/<int:item_id>/', RemoveFromCartView.as_view(), name='remove_from_cart'),
+    path('cart/checkout/', CheckoutView.as_view(), name='checkout'),
 
-    
 ]

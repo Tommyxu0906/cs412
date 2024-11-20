@@ -15,6 +15,7 @@
                 {% endif %}
             </a>
             <p>{{ user.username }}</p>
+            <a href="{% url 'cart' %}">Cart</a>
         {% else %}
             <p>Welcome, Mini eBay user! <a href="{% url 'login' %}">Log in</a></p>
         {% endif %}
