@@ -70,3 +70,14 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.listing.name} in {self.cart.user.username}'s cart"
+    
+class CreditCard(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='credit_cards')
+    cardholder_name = models.CharField(max_length=100)  # Name on the card
+    card_number_last4 = models.CharField(max_length=4)  # Last 4 digits of the card
+    expiry_date = models.CharField(max_length=5)  # Format MM/YY
+    card_type = models.CharField(max_length=20, choices=[('Visa', 'Visa'), ('MasterCard', 'MasterCard'), ('Amex', 'American Express')])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.card_type} ending in {self.card_number_last4}"

@@ -37,3 +37,21 @@ class ListingForm(forms.ModelForm):
         if price > 99999:
             raise forms.ValidationError("Price cannot exceed 99999.")
         return price
+    
+class CreditCardForm(forms.Form):
+    cardholder_name = forms.CharField(label='Cardholder Name', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    card_number = forms.CharField(label='Card Number', max_length=16, widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
+    expiry_date = forms.CharField(label='Expiry Date (MM/YY)', max_length=5, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'MM/YY'}))
+    card_type = forms.ChoiceField(label='Card Type', choices=[('Visa', 'Visa'), ('MasterCard', 'MasterCard'), ('Amex', 'American Express')], widget=forms.Select(attrs={'class': 'form-control'}))
+
+    def clean_card_number(self):
+        card_number = self.cleaned_data.get('card_number')
+        if len(card_number) != 16 or not card_number.isdigit():
+            raise forms.ValidationError("Card number must be 16 digits.")
+        return card_number
+
+    def clean_expiry_date(self):
+        expiry_date = self.cleaned_data.get('expiry_date')
+        if len(expiry_date) != 5 or expiry_date[2] != '/':
+            raise forms.ValidationError("Expiry date must be in MM/YY format.")
+        return expiry_date

@@ -287,3 +287,35 @@ class UpdateOrderStatusView(LoginRequiredMixin, View):
 
         messages.success(request, f"Order status updated to {status}.")
         return redirect('manage_listings')
+    
+class ManageCreditCardsView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # Fetch user's stored credit cards
+        cards = CreditCard.objects.filter(user=request.user)
+        form = CreditCardForm()
+        return render(request, 'project/manage_credit_cards.html', {'cards': cards, 'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = CreditCardForm(request.POST)
+        if form.is_valid():
+            # Save the card details (but only store the last 4 digits)
+            card_number = form.cleaned_data['card_number']
+            CreditCard.objects.create(
+                user=request.user,
+                cardholder_name=form.cleaned_data['cardholder_name'],
+                card_number_last4=card_number[-4:],  # Store only the last 4 digits
+                expiry_date=form.cleaned_data['expiry_date'],
+                card_type=form.cleaned_data['card_type'],
+            )
+            messages.success(request, "Credit card added successfully!")
+            return redirect('manage_credit_cards')
+        else:
+            messages.error(request, "Please correct the errors below.")
+        return self.get(request)  # Render the page with the form and existing cards
+
+class DeleteCreditCardView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        card = get_object_or_404(CreditCard, id=pk, user=request.user)
+        card.delete()
+        messages.success(request, "Credit card deleted successfully.")
+        return redirect('manage_credit_cards')

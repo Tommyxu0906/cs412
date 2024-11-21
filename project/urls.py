@@ -23,6 +23,7 @@ urlpatterns = [
     path('cart/remove/<int:item_id>/', RemoveFromCartView.as_view(), name='remove_from_cart'),
     path('cart/checkout/', CheckoutView.as_view(), name='checkout'),
     path('orders/update/<int:pk>/', UpdateOrderStatusView.as_view(), name='update_order_status'),
-
+    path('credit-cards/', ManageCreditCardsView.as_view(), name='manage_credit_cards'),
+    path('credit-cards/delete/<int:pk>/', DeleteCreditCardView.as_view(), name='delete_credit_card'),
 
 ]
