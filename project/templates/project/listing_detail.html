@@ -49,23 +49,27 @@
         </div>
 
         <!-- Buy Now Button -->
-        {% if user.is_authenticated %}
-        <div class="buy-now-container">
-            
-
-            <form method="post" action="{% url 'place_order' listing.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success">Buy Now</button>
-            </form>
-
-            <!-- Add to Cart Button -->
-            <form method="post" action="{% url 'add_to_cart' listing.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success">Add to Cart</button>
-            </form>
-        </div>
+        {% if listing.sold %}
+            <p>This item has already been sold.</p>
         {% else %}
-            <p>Please Login or Register before buying</p>
+            {% if user.is_authenticated %}
+                <div class="buy-now-container">
+                    <!-- Buy Now Button -->
+                    <form method="post" action="{% url 'place_order' listing.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Buy Now</button>
+                    </form>
+
+                    <!-- Add to Cart Button -->
+                    <form method="post" action="{% url 'add_to_cart' listing.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Add to Cart</button>
+                    </form>
+                </div>
+            {% else %}
+                <p>Please Login or Register before buying</p>
+            {% endif %}
         {% endif %}
+
     </div>
 {% endblock %}

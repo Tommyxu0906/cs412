@@ -45,7 +45,11 @@ class Order(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sales')
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed')], default='Pending')
+    status = models.CharField(
+        max_length=50,
+        choices=[('Pending', 'Pending'), ('Paid', 'Paid'), ('Shipped', 'Shipped'), ('Delivered', 'Delivered')],
+        default='Pending'
+    )
 
     def __str__(self):
         return f"Order {self.id}: {self.listing.name} by {self.buyer.username}"

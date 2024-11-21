@@ -124,15 +124,29 @@ class CompleteOrderView(View):
         messages.success(request, "Your order has been placed successfully!")
         return redirect('home')
 
-class PlaceOrderView(View):
+class PlaceOrderView(LoginRequiredMixin, View):
     def get(self, request, pk, *args, **kwargs):
+        # Fetch the listing to display the order confirmation page
         listing = get_object_or_404(Listing, pk=pk)
 
         # Prevent self-purchase
         if request.user == listing.user:
             return HttpResponseForbidden("You cannot purchase your own listing.")
 
-        # Create the order and mark the listing as sold
+        return render(request, 'project/place_order.html', {'listing': listing})
+
+    def post(self, request, pk, *args, **kwargs):
+        listing = get_object_or_404(Listing, pk=pk)
+
+        # Prevent self-purchase
+        if request.user == listing.user:
+            return HttpResponseForbidden("You cannot purchase your own listing.")
+
+        # Check if the listing is already sold
+        if listing.sold:
+            return HttpResponseForbidden("This listing has already been sold.")
+
+        # Mark the listing as sold and create the order
         order, created = Order.objects.get_or_create(
             buyer=request.user,
             seller=listing.user,
@@ -141,8 +155,8 @@ class PlaceOrderView(View):
         listing.sold = True
         listing.save()
 
-        # Redirect to the order confirmation page
-        return render(request, 'project/place_order.html', {'order': order})
+        # Redirect to the order confirmation or history page
+        return redirect('order_history')  # Replace 'order_history' with the appropriate URL name
     
 class OrderHistoryView(View):
     def get(self, request, *args, **kwargs):
@@ -152,12 +166,22 @@ class OrderHistoryView(View):
         # Get all orders of the logged-in user
         orders = Order.objects.filter(buyer=request.user).order_by('-created_at')
         return render(request, 'project/order_history.html', {'orders': orders})
-
+    
 class ManageListingsView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         # Fetch listings created by the logged-in user
         listings = Listing.objects.filter(user=request.user).order_by('-created_at')
-        return render(request, 'project/manage_listings.html', {'listings': listings})
+
+        # Fetch orders for these listings (if any)
+        orders = Order.objects.filter(seller=request.user).select_related('buyer__profile', 'listing')
+
+        # Pass both listings and orders to the template
+        return render(request, 'project/manage_listings.html', {
+            'listings': listings,
+            'orders': orders,
+        })
+
+
 
 class EditListingView(LoginRequiredMixin, UpdateView):
     model = Listing
@@ -186,6 +210,10 @@ class AddToCartView(LoginRequiredMixin, View):
         if listing.sold:
             return HttpResponseForbidden("This item has already been sold.")
         
+        # Prevent self-purchase
+        if request.user == listing.user:
+            return HttpResponseForbidden("You cannot purchase your own listing.")
+        
         # Get or create the user's cart
         cart, created = Cart.objects.get_or_create(user=request.user)
 
@@ -209,16 +237,53 @@ class RemoveFromCartView(LoginRequiredMixin, View):
 
 class CheckoutView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
+        # Get the cart for the logged-in user
         cart = get_object_or_404(Cart, user=request.user)
         items = cart.items.all()
 
-        # Mark all listings in the cart as sold
+        if not items.exists():
+            messages.error(request, "Your cart is empty.")
+            return redirect('cart')
+
+        # Process each cart item
         for item in items:
             listing = item.listing
+
+            # Ensure the listing has a valid seller
+            if not listing.user:
+                messages.error(request, f"Listing {listing.name} does not have a valid seller.")
+                return redirect('cart')
+
+            # Mark the listing as sold
             listing.sold = True
             listing.save()
+
+            # Create an order
+            Order.objects.create(
+                buyer=request.user,
+                seller=listing.user,  # Set the seller explicitly
+                listing=listing,
+            )
 
         # Clear the cart after checkout
         items.delete()
 
-        return redirect('home')  # Or a confirmation page
+        messages.success(request, "Checkout successful! Your order has been placed.")
+        return redirect('order_history')  # Redirect to the user's order history
+
+class UpdateOrderStatusView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        order = get_object_or_404(Order, id=pk, seller=request.user)
+        status = request.POST.get('status')
+
+        if status not in ['Pending', 'Paid', 'Shipped', 'Delivered']:
+            return HttpResponseForbidden("Invalid status value.")
+
+        order.status = status
+        order.save()
+
+        # Notify the buyer (if needed)
+        # Example: Send an email or add a notification
+
+        messages.success(request, f"Order status updated to {status}.")
+        return redirect('manage_listings')
