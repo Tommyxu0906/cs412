@@ -290,7 +290,6 @@ class UpdateOrderStatusView(LoginRequiredMixin, View):
     
 class ManageCreditCardsView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        # Fetch user's stored credit cards
         cards = CreditCard.objects.filter(user=request.user)
         form = CreditCardForm()
         return render(request, 'project/manage_credit_cards.html', {'cards': cards, 'form': form})
@@ -298,7 +297,6 @@ class ManageCreditCardsView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         form = CreditCardForm(request.POST)
         if form.is_valid():
-            # Save the card details (but only store the last 4 digits)
             card_number = form.cleaned_data['card_number']
             CreditCard.objects.create(
                 user=request.user,
@@ -310,8 +308,9 @@ class ManageCreditCardsView(LoginRequiredMixin, View):
             messages.success(request, "Credit card added successfully!")
             return redirect('manage_credit_cards')
         else:
-            messages.error(request, "Please correct the errors below.")
-        return self.get(request)  # Render the page with the form and existing cards
+            cards = CreditCard.objects.filter(user=request.user)
+            return render(request, 'project/manage_credit_cards.html', {'cards': cards, 'form': form})
+
 
 class DeleteCreditCardView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):

@@ -44,8 +44,66 @@
     <h3>Add a New Credit Card</h3>
     <form method="post" class="form">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        <!-- Cardholder Name -->
+        <div class="form-group">
+            <label for="id_cardholder_name">Cardholder Name</label>
+            <input 
+                type="text" 
+                name="cardholder_name" 
+                id="id_cardholder_name" 
+                value="{{ form.cardholder_name.value|default:'' }}" 
+                class="form-control">
+            {% if form.cardholder_name.errors %}
+                <p class="text-danger">{{ form.cardholder_name.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Card Number -->
+        <div class="form-group">
+            <label for="id_card_number">Card Number</label>
+            <input 
+                type="text" 
+                name="card_number" 
+                id="id_card_number" 
+                value="{{ form.card_number.value|default:'' }}" 
+                class="form-control">
+            {% if form.card_number.errors %}
+                <p class="text-danger">{{ form.card_number.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Expiry Date -->
+        <div class="form-group">
+            <label for="id_expiry_date">Expiry Date (MM/YY)</label>
+            <input 
+                type="text" 
+                name="expiry_date" 
+                id="id_expiry_date" 
+                value="{{ form.expiry_date.value|default:'' }}" 
+                class="form-control">
+            {% if form.expiry_date.errors %}
+                <p class="text-danger">{{ form.expiry_date.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Card Type -->
+        <div class="form-group">
+            <label for="id_card_type">Card Type</label>
+            <select name="card_type" id="id_card_type" class="form-control">
+                {% for value, label in form.card_type.field.choices %}
+                    <option value="{{ value }}" {% if form.card_type.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            {% if form.card_type.errors %}
+                <p class="text-danger">{{ form.card_type.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Submit Button -->
         <button type="submit" class="btn btn-success">Add Card</button>
+
     </form>
+    
 </div>
 {% endblock %}
