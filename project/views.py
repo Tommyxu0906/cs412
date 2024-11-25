@@ -12,16 +12,6 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-class CreateListingView(LoginRequiredMixin, CreateView):
-    model = Listing
-    form_class = ListingForm
-    template_name = 'project/create_listing.html'
-    success_url = reverse_lazy('home')
-
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
-
 def register(request):
     if request.method == "POST":
         user_form = UserRegistrationForm(request.POST)
@@ -96,7 +86,17 @@ class ShowHomeView(View):
             'max_price': max_price,
             'result_count': result_count,
         })
+    
+class CreateListingView(LoginRequiredMixin, CreateView):
+    model = Listing
+    form_class = ListingForm
+    template_name = 'project/create_listing.html'
+    success_url = reverse_lazy('home')
 
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+    
 class ShowListingPageView(DetailView):
     model = Listing
     template_name = 'project/listing_detail.html'  # The template for displaying a single listing
@@ -237,12 +237,6 @@ class RemoveFromCartView(LoginRequiredMixin, View):
         cart_item.delete()
         return redirect('cart')
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db import transaction
-from django.contrib import messages
-from .models import Listing, CreditCard, Order
-from .forms import CreditCardForm
-
 class CheckoutView(LoginRequiredMixin, View):
     def get(self, request, pk, *args, **kwargs):
         # Retrieve the listing for single item checkout
@@ -354,9 +348,6 @@ class UpdateOrderStatusView(LoginRequiredMixin, View):
         order.status = status
         order.save()
 
-        # Notify the buyer (if needed)
-        # Example: Send an email or add a notification
-
         messages.success(request, f"Order status updated to {status}.")
         return redirect('manage_listings')
     
@@ -382,7 +373,6 @@ class ManageCreditCardsView(LoginRequiredMixin, View):
         else:
             cards = CreditCard.objects.filter(user=request.user)
             return render(request, 'project/manage_credit_cards.html', {'cards': cards, 'form': form})
-
 
 class DeleteCreditCardView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):

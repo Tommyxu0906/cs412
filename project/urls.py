@@ -28,6 +28,5 @@ urlpatterns = [
     path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('checkout/<int:pk>/', CheckoutView.as_view(), name='checkout_single'),
     path('checkout/cart/', CartCheckoutView.as_view(), name='checkout_cart'),
-    
 
 ]
