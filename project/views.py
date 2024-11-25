@@ -10,6 +10,7 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 class CreateListingView(LoginRequiredMixin, CreateView):
     model = Listing
@@ -96,20 +97,15 @@ class ShowHomeView(View):
             'result_count': result_count,
         })
 
-        
-
 class ShowListingPageView(DetailView):
     model = Listing
     template_name = 'project/listing_detail.html'  # The template for displaying a single listing
     context_object_name = 'listing'  # Use 'listing' as the variable name in the template
 
-
-
 class UserProfileView(DetailView):
     model = User
     template_name = 'project/profile.html'
     context_object_name = 'user'
-
 
 class CompleteOrderView(View):
     def post(self, request, pk, *args, **kwargs):
@@ -157,14 +153,14 @@ class PlaceOrderView(LoginRequiredMixin, View):
 
         # Redirect to the order confirmation or history page
         return redirect('order_history')  # Replace 'order_history' with the appropriate URL name
-    
+
 class OrderHistoryView(View):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
 
         # Get all orders of the logged-in user
-        orders = Order.objects.filter(buyer=request.user).order_by('-created_at')
+        orders = Order.objects.filter(buyer=request.user).select_related('listing', 'seller').order_by('-created_at')
         return render(request, 'project/order_history.html', {'orders': orders})
     
 class ManageListingsView(LoginRequiredMixin, View):
@@ -180,8 +176,6 @@ class ManageListingsView(LoginRequiredMixin, View):
             'listings': listings,
             'orders': orders,
         })
-
-
 
 class EditListingView(LoginRequiredMixin, UpdateView):
     model = Listing
@@ -223,11 +217,19 @@ class AddToCartView(LoginRequiredMixin, View):
 
         return redirect('cart')
 
-
 class ViewCartView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         cart, created = Cart.objects.get_or_create(user=request.user)
-        return render(request, 'project/cart.html', {'cart': cart})
+        
+        # Separate sold and unsold items
+        unsold_items = cart.items.filter(listing__sold=False).select_related('listing')
+        sold_items = cart.items.filter(listing__sold=True).select_related('listing')
+        
+        return render(request, 'project/cart.html', {
+            'cart': cart,
+            'unsold_items': unsold_items,
+            'sold_items': sold_items,
+        })
 
 class RemoveFromCartView(LoginRequiredMixin, View):
     def post(self, request, item_id, *args, **kwargs):
@@ -235,41 +237,111 @@ class RemoveFromCartView(LoginRequiredMixin, View):
         cart_item.delete()
         return redirect('cart')
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.db import transaction
+from django.contrib import messages
+from .models import Listing, CreditCard, Order
+from .forms import CreditCardForm
+
 class CheckoutView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        # Get the cart for the logged-in user
-        cart = get_object_or_404(Cart, user=request.user)
-        items = cart.items.all()
+    def get(self, request, pk, *args, **kwargs):
+        # Retrieve the listing for single item checkout
+        listing = get_object_or_404(Listing, pk=pk, sold=False)
 
-        if not items.exists():
-            messages.error(request, "Your cart is empty.")
-            return redirect('cart')
+        # Get user's saved credit cards and default address
+        credit_cards = CreditCard.objects.filter(user=request.user)
+        profile_address = request.user.profile.address
 
-        # Process each cart item
-        for item in items:
-            listing = item.listing
+        return render(request, 'project/checkout.html', {
+            'listing': listing,
+            'credit_cards': credit_cards,
+            'profile_address': profile_address,
+        })
 
-            # Ensure the listing has a valid seller
-            if not listing.user:
-                messages.error(request, f"Listing {listing.name} does not have a valid seller.")
-                return redirect('cart')
+    def post(self, request, pk, *args, **kwargs):
+        # Retrieve submitted data
+        delivery_address = request.POST.get('delivery_address', '').strip()
+        payment_method = request.POST.get('payment_method')
+        cardholder_name = request.POST.get('cardholder_name', '').strip()
+        card_number = request.POST.get('card_number', '').strip()
+        expiry_date = request.POST.get('expiry_date', '').strip()
+        card_type = request.POST.get('card_type', '').strip()
 
-            # Mark the listing as sold
-            listing.sold = True
-            listing.save()
+        # Validate delivery address
+        if not delivery_address:
+            messages.error(request, "Please provide a delivery address.")
+            return self.render_checkout(request, pk, delivery_address, payment_method, cardholder_name, card_number, expiry_date, card_type)
 
-            # Create an order
-            Order.objects.create(
-                buyer=request.user,
-                seller=listing.user,  # Set the seller explicitly
-                listing=listing,
+        # Handle new card validation
+        if payment_method == "new":
+            form = CreditCardForm({
+                'cardholder_name': cardholder_name,
+                'card_number': card_number,
+                'expiry_date': expiry_date,
+                'card_type': card_type,
+            })
+            if not form.is_valid():
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, error)
+                return self.render_checkout(request, pk, delivery_address, payment_method, cardholder_name, card_number, expiry_date, card_type)
+
+            # Save the new card
+            card_number = form.cleaned_data['card_number']
+            selected_card = CreditCard.objects.create(
+                user=request.user,
+                cardholder_name=form.cleaned_data['cardholder_name'],
+                card_number_last4=card_number[-4:],  # Store only the last 4 digits
+                expiry_date=form.cleaned_data['expiry_date'],
+                card_type=form.cleaned_data['card_type'],
             )
+        else:
+            # Ensure the selected card exists and belongs to the user
+            try:
+                selected_card = CreditCard.objects.get(id=payment_method, user=request.user)
+            except CreditCard.DoesNotExist:
+                messages.error(request, "Invalid payment method.")
+                return self.render_checkout(request, pk, delivery_address, payment_method, cardholder_name, card_number, expiry_date, card_type)
 
-        # Clear the cart after checkout
-        items.delete()
+        # Process the order
+        with transaction.atomic():
+            listing = get_object_or_404(Listing, pk=pk, sold=False)
+            self.create_order(request, listing, delivery_address, selected_card)
 
-        messages.success(request, "Checkout successful! Your order has been placed.")
-        return redirect('order_history')  # Redirect to the user's order history
+        messages.success(request, "Order placed successfully!")
+        return redirect('order_history')
+
+    def render_checkout(self, request, pk, delivery_address, payment_method, cardholder_name, card_number, expiry_date, card_type):
+        credit_cards = CreditCard.objects.filter(user=request.user)
+        profile_address = request.user.profile.address
+        listing = get_object_or_404(Listing, pk=pk, sold=False)
+
+        return render(request, 'project/checkout.html', {
+            'listing': listing,
+            'credit_cards': credit_cards,
+            'profile_address': profile_address,
+            'delivery_address': delivery_address,
+            'payment_method': payment_method,
+            'cardholder_name': cardholder_name,
+            'card_number': card_number,
+            'expiry_date': expiry_date,
+            'card_type': card_type,
+        })
+
+    def create_order(self, request, listing, delivery_address, selected_card):
+        # Create a new order for the listing
+        Order.objects.create(
+            buyer=request.user,
+            seller=listing.user,
+            listing=listing,
+            delivery_address=delivery_address,
+            status='Pending',
+        )
+
+        # Mark the listing as sold
+        listing.sold = True
+        listing.save()
+
 
 class UpdateOrderStatusView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
@@ -318,3 +390,97 @@ class DeleteCreditCardView(LoginRequiredMixin, View):
         card.delete()
         messages.success(request, "Credit card deleted successfully.")
         return redirect('manage_credit_cards')
+
+class CartCheckoutView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        cart = request.user.cart  # Retrieve the user's cart
+        
+        # Separate unsold and sold items
+        unsold_items = cart.items.filter(listing__sold=False).select_related('listing')
+        sold_items = cart.items.filter(listing__sold=True).select_related('listing')
+
+        # Get user's saved credit cards and default address
+        credit_cards = CreditCard.objects.filter(user=request.user)
+        profile_address = request.user.profile.address
+
+        return render(request, 'project/checkout_cart.html', {
+            'unsold_items': unsold_items,
+            'sold_items': sold_items,
+            'credit_cards': credit_cards,
+            'profile_address': profile_address,
+            'unsold_items_total_price': sum(item.listing.price for item in unsold_items),
+        })
+
+    def post(self, request, *args, **kwargs):
+        delivery_address = request.POST.get('delivery_address', '').strip()
+        payment_method = request.POST.get('payment_method')
+        cardholder_name = request.POST.get('cardholder_name', '').strip()
+        card_number = request.POST.get('card_number', '').strip()
+        expiry_date = request.POST.get('expiry_date', '').strip()
+        card_type = request.POST.get('card_type', '').strip()
+
+        # Validate the delivery address
+        if not delivery_address:
+            messages.error(request, "Please provide a delivery address.")
+            return self.get(request)
+
+        # Handle "Add New Card" scenario
+        if payment_method == "new":
+            form = CreditCardForm({
+                'cardholder_name': cardholder_name,
+                'card_number': card_number,
+                'expiry_date': expiry_date,
+                'card_type': card_type,
+            })
+            if not form.is_valid():
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, error)
+                return self.get(request)
+
+            # Save the new card
+            card_number = form.cleaned_data['card_number']
+            selected_card = CreditCard.objects.create(
+                user=request.user,
+                cardholder_name=form.cleaned_data['cardholder_name'],
+                card_number_last4=card_number[-4:],
+                expiry_date=form.cleaned_data['expiry_date'],
+                card_type=form.cleaned_data['card_type'],
+            )
+        else:
+            # Validate existing card
+            try:
+                selected_card = CreditCard.objects.get(id=payment_method, user=request.user)
+            except CreditCard.DoesNotExist:
+                messages.error(request, "Invalid payment method.")
+                return self.get(request)
+
+        # Process cart checkout for unsold items
+        cart = request.user.cart
+        unsold_items = cart.items.filter(listing__sold=False).select_related('listing')
+        if not unsold_items.exists():
+            messages.error(request, "Your cart has no items available for checkout.")
+            return redirect('cart')
+
+        with transaction.atomic():
+            for cart_item in unsold_items:
+                listing = cart_item.listing
+
+                # Create an order for each listing
+                Order.objects.create(
+                    buyer=request.user,
+                    seller=listing.user,
+                    listing=listing,
+                    status='Pending',
+                    delivery_address=delivery_address,
+                )
+
+                # Mark listing as sold
+                listing.sold = True
+                listing.save()
+
+            # Clear only unsold items from the cart
+            unsold_items.delete()
+
+        messages.success(request, "Your order has been placed successfully!")
+        return redirect('order_history')

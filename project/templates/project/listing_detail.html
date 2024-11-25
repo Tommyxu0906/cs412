@@ -55,10 +55,8 @@
             {% if user.is_authenticated %}
                 <div class="buy-now-container">
                     <!-- Buy Now Button -->
-                    <form method="post" action="{% url 'place_order' listing.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success">Buy Now</button>
-                    </form>
+                    <a href="{% url 'checkout_single' listing.id %}" class="btn btn-success">Buy Now</a>
+
 
                     <!-- Add to Cart Button -->
                     <form method="post" action="{% url 'add_to_cart' listing.id %}" style="display:inline;">

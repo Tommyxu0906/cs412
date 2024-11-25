@@ -44,15 +44,13 @@ class Order(models.Model):
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sales')
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    delivery_address = models.TextField(blank=True, null=True)  # Add this field
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
-        max_length=50,
+        max_length=50, 
         choices=[('Pending', 'Pending'), ('Paid', 'Paid'), ('Shipped', 'Shipped'), ('Delivered', 'Delivered')],
         default='Pending'
     )
-
-    def __str__(self):
-        return f"Order {self.id}: {self.listing.name} by {self.buyer.username}"
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
@@ -62,7 +60,7 @@ class Cart(models.Model):
         return f"Cart of {self.user.username}"
 
     def total_price(self):
-        return sum(item.listing.price for item in self.items.all())
+        return sum(item.listing.price for item in self.items.filter(listing__sold=False))
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')

@@ -1,0 +1,54 @@
+{% extends 'project/base.html' %}
+
+{% block title %}Cart Checkout{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Cart Checkout</h2>
+
+    <!-- Cart Items -->
+    <h3>Your Items</h3>
+    {% if unsold_items %}
+        {% for item in unsold_items %}
+            <div class="card">
+                <img src="{{ item.listing.image.url }}" alt="{{ item.listing.name }}" class="listing-image">
+                <div class="card-details">
+                    <h3>{{ item.listing.name }}</h3>
+                    <p>Price: ${{ item.listing.price }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Your cart is empty or all items are sold.</p>
+    {% endif %}
+
+    <!-- Delivery Address -->
+    <h3>Delivery Address</h3>
+    <form method="post" class="form">
+        {% csrf_token %}
+        <textarea name="delivery_address" class="form-control" placeholder="Enter delivery address">{{ profile_address }}</textarea>
+
+        <!-- Payment Method -->
+        <h3>Payment Method</h3>
+        <div>
+            {% for card in credit_cards %}
+                <input 
+                    type="radio" 
+                    name="payment_method" 
+                    value="{{ card.id }}" 
+                    id="card_{{ card.id }}" 
+                >
+                <label for="card_{{ card.id }}">{{ card.card_type }} ending in {{ card.card_number_last4 }}</label><br>
+            {% endfor %}
+        </div>
+
+        <!-- Confirm Price -->
+        <h3>Total Price</h3>
+        <p>${{ unsold_items_total_price }}</p>
+
+
+        <!-- Place Order Button -->
+        <button type="submit" class="btn btn-success">Place Order</button>
+    </form>
+</div>
+{% endblock %}
