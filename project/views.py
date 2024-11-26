@@ -342,7 +342,7 @@ class UpdateOrderStatusView(LoginRequiredMixin, View):
         order = get_object_or_404(Order, id=pk, seller=request.user)
         status = request.POST.get('status')
 
-        if status not in ['Pending', 'Paid', 'Shipped', 'Delivered']:
+        if status not in ['Paid', 'Shipped', 'Delivered']:
             return HttpResponseForbidden("Invalid status value.")
 
         order.status = status

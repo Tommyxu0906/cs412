@@ -45,7 +45,6 @@
                                         <form method="post" action="{% url 'update_order_status' order.id %}">
                                             {% csrf_token %}
                                             <select name="status" class="dropdown-select">
-                                                <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
                                                 <option value="Paid" {% if order.status == "Paid" %}selected{% endif %}>Paid</option>
                                                 <option value="Shipped" {% if order.status == "Shipped" %}selected{% endif %}>Shipped</option>
                                                 <option value="Delivered" {% if order.status == "Delivered" %}selected{% endif %}>Delivered</option>

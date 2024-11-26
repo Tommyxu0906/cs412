@@ -10,6 +10,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
+    padding-bottom: 60px;
 }
 
 /* Header styling */
@@ -31,12 +32,13 @@ footer {
     background-color: #333;
     color: #fff;
     text-align: center;
-    padding: 10px;
-    position: sticky;
+    padding: 1px;
+    position: fixed; /* Change sticky to fixed */
     width: 100%;
     bottom: 0;
-    margin-top: 250px;
+    z-index: 1000;
 }
+
 
 /* Section title styling */
 h2 {
