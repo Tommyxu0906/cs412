@@ -1,10 +1,10 @@
 Django>=3.2,<4.0
 gunicorn
-psycopg2-binary
+psycopg2-binary==2.9.6
 whitenoise
 dj-database-url==0.5.0
-psycopg2-binary==2.9.6 
 pytz==2023.3
 sqlparse==0.4.4
 plotly==5.17.0
 pandas==2.1.2
+Pillow==10.0.1
