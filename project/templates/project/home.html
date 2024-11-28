@@ -56,6 +56,7 @@
                     <div class="card-details">
                         <h3><a href="{% url 'listing_detail' listing.pk %}">{{ listing.name }}</a></h3>
                         <p>Price: ${{ listing.price }}</p>
+                        <p>Available Quantity: {{ listing.quantity }}</p>
                     </div>
                 </div>
             {% endfor %}

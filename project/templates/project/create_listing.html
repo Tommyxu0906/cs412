@@ -7,9 +7,77 @@
         <h2>Create a New Listing</h2>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form.as_p }}
+            
+            <!-- Name -->
+            <div class="form-group">
+                <label for="id_name">Name</label>
+                <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}">
+                {% if form.name.errors %}
+                    <p class="text-danger">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Description -->
+            <div class="form-group">
+                <label for="id_description">Description</label>
+                <textarea name="description" id="id_description" class="form-control">{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.errors %}
+                    <p class="text-danger">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Price -->
+            <div class="form-group">
+                <label for="id_price">Price</label>
+                <input type="number" name="price" id="id_price" class="form-control" step="0.01" value="{{ form.price.value|default:'' }}">
+                {% if form.price.errors %}
+                    <p class="text-danger">{{ form.price.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Quantity -->
+            <div class="form-group">
+                <label for="id_quantity">Quantity</label>
+                <input type="number" name="quantity" id="id_quantity" class="form-control" min="1" value="{{ form.quantity.value|default:1 }}">
+                {% if form.quantity.errors %}
+                    <p class="text-danger">{{ form.quantity.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Image -->
+            <div class="form-group">
+                <label for="id_image">Image</label>
+                <input type="file" name="image" id="id_image" class="form-control">
+                {% if form.image.errors %}
+                    <p class="text-danger">{{ form.image.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Category -->
+            <div class="form-group">
+                <label for="id_category">Category</label>
+                <input type="text" name="category" id="id_category" class="form-control" value="{{ form.category.value|default:'' }}">
+                {% if form.category.errors %}
+                    <p class="text-danger">{{ form.category.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Expiration Date -->
+            <div class="form-group">
+                <label for="id_expires_at">Expiration Date</label>
+                <input type="date" name="expires_at" id="id_expires_at" class="form-control" value="{{ form.expires_at.value|default:'' }}">
+                {% if form.expires_at.errors %}
+                    <p class="text-danger">{{ form.expires_at.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">Create Listing</button>
         </form>
-        <a href="{% url 'home' %}"><button class="btn btn-primary">Cancel</button></a>
+        
+        <!-- Cancel Button -->
+        <a href="{% url 'home' %}">
+            <button class="btn btn-secondary">Cancel</button>
+        </a>
     </div>
 {% endblock %}

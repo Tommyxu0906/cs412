@@ -28,8 +28,12 @@ class ProfileForm(forms.ModelForm):
 class ListingForm(forms.ModelForm):
     class Meta:
         model = Listing
-        fields = ['name', 'description', 'price', 'image', 'category', 'expires_at']
-
+        fields = ['name', 'description', 'price', 'image', 'category', 'expires_at', 'quantity']
+        widgets = {
+            'expires_at': forms.DateInput(attrs={'type': 'date'}),
+            'quantity': forms.NumberInput(attrs={'min': 1}),  
+        }
+    
     def clean_price(self):
         price = self.cleaned_data.get('price')
         if price is None:
@@ -39,8 +43,7 @@ class ListingForm(forms.ModelForm):
         if price > 99999:
             raise forms.ValidationError("Price cannot exceed 99999.")
         return price
-    
-    
+
 
 class CreditCardForm(forms.Form):
     cardholder_name = forms.CharField(

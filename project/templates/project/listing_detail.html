@@ -22,6 +22,10 @@
                     <td>${{ listing.price }}</td>
                 </tr>
                 <tr>
+                    <th>Available Quantity</th>
+                    <td>{{ listing.quantity }}</td>
+                </tr>
+                <tr>
                     <th>Description</th>
                     <td>{{ listing.description }}</td>
                 </tr>
@@ -34,6 +38,7 @@
                     <td>{{ listing.expires_at|date:"F d, Y" }}</td>
                 </tr>
             </table>
+            
         </div>
 
         <!-- Seller Information -->

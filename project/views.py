@@ -96,7 +96,7 @@ class CreateListingView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
-    
+
 class ShowListingPageView(DetailView):
     model = Listing
     template_name = 'project/listing_detail.html'  # The template for displaying a single listing

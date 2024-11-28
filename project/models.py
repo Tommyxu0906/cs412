@@ -21,6 +21,7 @@ class Listing(models.Model):
     expires_at = models.DateTimeField() # Expiration timestamp for the listing
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")  # Link to User
     sold = models.BooleanField(default=False)  # Track sold status
+    quantity = models.PositiveIntegerField(default=1)
 
     def clean(self):
         # Validate the price field
@@ -30,6 +31,8 @@ class Listing(models.Model):
             raise ValidationError("Price cannot be negative.")
         if self.price > 99999:
             raise ValidationError("Price cannot exceed 99999.")
+        if self.quantity < 1:
+            raise ValidationError("Quantity must be at least 1.")
 
     def save(self, *args, **kwargs):
         # Call the clean method to validate the model before saving
@@ -37,8 +40,7 @@ class Listing(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
-
+        return f"{self.name} (x{self.quantity})"
 
 class Order(models.Model):
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
