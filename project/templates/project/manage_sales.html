@@ -1,0 +1,54 @@
+{% extends 'project/base.html' %}
+
+{% block title %}Manage My Sales{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Manage My Sales</h2>
+
+    <table class="order-history-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Category</th>
+                <th>Date Listed</th>
+                <th>Buyer Address</th>
+                <th>Update Order Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.listing.name }}</td>
+                    <td>${{ order.listing.price }}</td>
+                    <td>{{ order.quantity}}</td>
+                    <td>{{ order.total_price}}</td>
+                    <td>{{ order.listing.category }}</td>
+                    <td>{{ order.listing.created_at|date:"F d, Y" }}</td>
+                    <td>{{ order.delivery_address }}</td>
+                    <td>
+                        <form method="post" action="{% url 'update_order_status' order.id %}">
+                            {% csrf_token %}
+                            <select name="status" class="form-control">
+                                <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="Paid" {% if order.status == "Paid" %}selected{% endif %}>Paid</option>
+                                <option value="Shipped" {% if order.status == "Shipped" %}selected{% endif %}>Shipped</option>
+                                <option value="Delivered" {% if order.status == "Delivered" %}selected{% endif %}>Delivered</option>
+                            </select>
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">You have no sales yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

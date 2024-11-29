@@ -168,12 +168,16 @@ class ManageListingsView(LoginRequiredMixin, View):
         # Fetch listings created by the logged-in user
         listings = Listing.objects.filter(user=request.user).order_by('-created_at')
 
-        # Fetch orders for these listings (if any)
-        orders = Order.objects.filter(seller=request.user).select_related('buyer__profile', 'listing')
-
-        # Pass both listings and orders to the template
         return render(request, 'project/manage_listings.html', {
             'listings': listings,
+        })
+
+class ManageSalesView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # Fetch all orders where the logged-in user is the seller
+        orders = Order.objects.filter(seller=request.user).select_related('listing', 'buyer__profile').order_by('-created_at')
+
+        return render(request, 'project/manage_sales.html', {
             'orders': orders,
         })
 
@@ -254,7 +258,6 @@ class ViewCartView(LoginRequiredMixin, View):
             'sold_items': sold_items,
             'total_price': total_price,
         })
-
 
 class RemoveFromCartView(LoginRequiredMixin, View):
     def post(self, request, item_id, *args, **kwargs):
@@ -393,20 +396,20 @@ class CheckoutView(LoginRequiredMixin, View):
             listing.sold = True
         listing.save()
 
-
 class UpdateOrderStatusView(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         order = get_object_or_404(Order, id=pk, seller=request.user)
         status = request.POST.get('status')
+        next_url = request.POST.get('next', 'manage_sales')
 
-        if status not in ['Paid', 'Shipped', 'Delivered']:
+        if status not in ['Pending', 'Paid', 'Shipped', 'Delivered']:
             return HttpResponseForbidden("Invalid status value.")
 
         order.status = status
         order.save()
 
         messages.success(request, f"Order status updated to {status}.")
-        return redirect('manage_listings')
+        return redirect(next_url)
     
 class ManageCreditCardsView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):

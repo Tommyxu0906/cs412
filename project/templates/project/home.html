@@ -47,18 +47,18 @@
     {% if listings %}
         <div class="listing-cards">
             {% for listing in listings %}
+            <a href="{% url 'listing_detail' listing.pk %}">
                 <div class="card">
-                    <a href="{% url 'listing_detail' listing.pk %}">
                         {% if listing.image %}
                             <img src="{{ listing.image.url }}" alt="{{ listing.name }}" class="listing-image">
-                        {% endif %}
-                    </a>
+                        {% endif %}                    
                     <div class="card-details">
                         <h3><a href="{% url 'listing_detail' listing.pk %}">{{ listing.name }}</a></h3>
                         <p>Price: ${{ listing.price }}</p>
                         <p>Available Quantity: {{ listing.quantity }}</p>
                     </div>
                 </div>
+            </a>
             {% endfor %}
         </div>
     {% else %}

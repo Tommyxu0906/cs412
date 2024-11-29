@@ -20,6 +20,10 @@
                 <td>{{ user.username }}</td>
             </tr>
             <tr>
+                <th>Default Address</th>
+                <td>{{ user.profile.address }}</td>
+            </tr>
+            <tr>
                 <th>Date Joined</th>
                 <td>{{ user.date_joined|date:"F d, Y" }}</td>
             </tr>
