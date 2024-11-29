@@ -37,7 +37,7 @@
             
             <!-- Quantity -->
             <div class="form-group">
-                <label for="id_quantity">Quantity</label>
+                <label for="id_quantity">Quantity Available</label>
                 <input type="number" name="quantity" id="id_quantity" class="form-control" min="1" value="{{ form.quantity.value|default:1 }}">
                 {% if form.quantity.errors %}
                     <p class="text-danger">{{ form.quantity.errors.0 }}</p>
