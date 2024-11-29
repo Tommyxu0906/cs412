@@ -36,6 +36,18 @@
         {% csrf_token %}
         <textarea name="delivery_address" class="form-control" placeholder="Enter delivery address">{{ profile_address }}</textarea>
 
+        <h3>Quantity</h3>
+    <div class="quantity-update-container">
+        <input 
+            type="number" 
+            name="quantity" 
+            value="{{ quantity }}" 
+            min="1" 
+            max="{{ listing.quantity }}" 
+            class="form-control quantity-input">
+        <button type="submit" name="update_quantity" value="true">Update</button>
+    </div>
+
         <!-- Payment Method -->
         <h3>Payment Method</h3>
         <div>
