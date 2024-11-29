@@ -6,23 +6,59 @@
 <div class="container">
     <h2>Cart Checkout</h2>
 
+    <style>
+        .checkout-item-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkout-item-image {
+            flex: 0 0 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .checkout-item-details {
+            flex: 1;
+        }
+
+        .checkout-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+
     <!-- Cart Items -->
     <h3>Your Items</h3>
     {% if unsold_items %}
-        {% for item in unsold_items %}
-            <div class="card">
-                <img src="{{ item.listing.image.url }}" alt="{{ item.listing.name }}" class="listing-image">
-                <div class="card-details">
-                    <h3>{{ item.listing.name }}</h3>
-                    <p>Price: ${{ item.listing.price }}</p>
+        <div>
+            {% for item in unsold_items %}
+            <div class="checkout-item-card">
+                <img src="{{ item.listing.image.url }}" alt="{{ item.listing.name }}" class="checkout-item-image">
+                <div class="checkout-item-details">
+                    <h4>{{ item.listing.name }}</h4>
+                    <p>Price per item: ${{ item.listing.price|floatformat:2 }}</p>
+                    <p>Quantity: {{ item.quantity }}</p>
+                    <p>Subtotal: ${{ item.total_price }}</p>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     {% else %}
-        <p>Your cart is empty or all items are sold.</p>
+        <p class="text-muted">Your cart is empty or all items are sold.</p>
     {% endif %}
 
     <!-- Delivery Address -->
+    {% if unsold_items %}
     <h3>Delivery Address</h3>
     <form method="post" class="form">
         {% csrf_token %}
@@ -44,10 +80,12 @@
 
         <!-- Confirm Price -->
         <h3>Total Price</h3>
-        <p>${{ unsold_items_total_price }}</p>
+        <p>${{ unsold_items_total_price|floatformat:2 }}</p>
 
         <!-- Place Order Button -->
-        <button type="submit" class="btn btn-success">Place Order</button>
+        <button type="submit" class="btn btn-success btn-lg mt-3">Place Order</button>
     </form>
+    {% endif %}
 </div>
 {% endblock %}
+

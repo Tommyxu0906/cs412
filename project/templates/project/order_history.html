@@ -12,6 +12,8 @@
                         <th>Order ID</th>
                         <th>Item</th>
                         <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
                         <th>Seller</th>
                         <th>Date</th>
                         <th>Status</th>
@@ -28,6 +30,8 @@
                                 </a>
                             </td>
                             <td>${{ order.listing.price }}</td>
+                            <td>{{ order.quantity}}</td>
+                            <td>{{ order.total_price}}</td>
                             <td>{{ order.seller.username }}</td>
                             <td>{{ order.created_at|date:"F d, Y" }}</td>
                             <td>{{ order.status }}</td>

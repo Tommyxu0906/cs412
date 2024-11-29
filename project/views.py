@@ -208,28 +208,53 @@ class AddToCartView(LoginRequiredMixin, View):
         if request.user == listing.user:
             return HttpResponseForbidden("You cannot purchase your own listing.")
         
+        # Validate the quantity
+        try:
+            quantity = int(request.POST.get('quantity', 1))  # Default to 1 if no quantity is provided
+        except ValueError:
+            messages.error(request, "Invalid quantity.")
+            return redirect('listing_detail', pk=listing.id)
+
+        if quantity < 1 or quantity > listing.quantity:
+            messages.error(request, "Invalid quantity selected.")
+            return redirect('listing_detail', pk=listing.id)
+        
         # Get or create the user's cart
         cart, created = Cart.objects.get_or_create(user=request.user)
 
-        # Add item to the cart if not already present
-        if not CartItem.objects.filter(cart=cart, listing=listing).exists():
-            CartItem.objects.create(cart=cart, listing=listing)
+        # Check if the item already exists in the cart
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, listing=listing)
 
+        if not created:
+            # Update the quantity if already in the cart
+            new_quantity = cart_item.quantity + quantity
+            if new_quantity > listing.quantity:
+                messages.error(request, "Cannot add more than available quantity.")
+                return redirect('cart')
+            cart_item.quantity = new_quantity
+        else:
+            cart_item.quantity = quantity
+
+        cart_item.save()
+
+        messages.success(request, "Item added to cart.")
         return redirect('cart')
 
+    
 class ViewCartView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         cart, created = Cart.objects.get_or_create(user=request.user)
-        
-        # Separate sold and unsold items
         unsold_items = cart.items.filter(listing__sold=False).select_related('listing')
         sold_items = cart.items.filter(listing__sold=True).select_related('listing')
-        
+
+        total_price = sum(item.total_price for item in unsold_items)  # Use total_price as a property
+
         return render(request, 'project/cart.html', {
-            'cart': cart,
             'unsold_items': unsold_items,
             'sold_items': sold_items,
+            'total_price': total_price,
         })
+
 
 class RemoveFromCartView(LoginRequiredMixin, View):
     def post(self, request, item_id, *args, **kwargs):
@@ -239,21 +264,39 @@ class RemoveFromCartView(LoginRequiredMixin, View):
 
 class CheckoutView(LoginRequiredMixin, View):
     def get(self, request, pk, *args, **kwargs):
-        # Retrieve the listing for single item checkout
+        # Retrieve the listing for single-item checkout
         listing = get_object_or_404(Listing, pk=pk, sold=False)
+        quantity = int(request.GET.get('quantity', 1))  # Default to 1 if not provided
+        total_price = listing.price * quantity  # Calculate total price
 
-        # Get user's saved credit cards and default address
+        # Retrieve user's saved credit cards and default address
         credit_cards = CreditCard.objects.filter(user=request.user)
         profile_address = request.user.profile.address
 
+        # Render the checkout template
         return render(request, 'project/checkout.html', {
             'listing': listing,
+            'quantity': quantity,
+            'total_price': total_price,
             'credit_cards': credit_cards,
             'profile_address': profile_address,
         })
 
     def post(self, request, pk, *args, **kwargs):
-        # Retrieve submitted data
+        # Fetch the listing and quantity
+        listing = get_object_or_404(Listing, pk=pk, sold=False)
+        try:
+            quantity = int(request.POST.get('quantity', 1))
+        except ValueError:
+            messages.error(request, "Invalid quantity.")
+            return redirect('checkout_single', pk=pk)
+
+        # Validate quantity
+        if quantity < 1 or quantity > listing.quantity:
+            messages.error(request, f"Invalid quantity selected. Only {listing.quantity} available.")
+            return redirect('checkout_single', pk=pk)
+
+        # Retrieve other submitted data
         delivery_address = request.POST.get('delivery_address', '').strip()
         payment_method = request.POST.get('payment_method')
         cardholder_name = request.POST.get('cardholder_name', '').strip()
@@ -264,9 +307,11 @@ class CheckoutView(LoginRequiredMixin, View):
         # Validate delivery address
         if not delivery_address:
             messages.error(request, "Please provide a delivery address.")
-            return self.render_checkout(request, pk, delivery_address, payment_method, cardholder_name, card_number, expiry_date, card_type)
+            return self.render_checkout(
+                request, pk, delivery_address, quantity, payment_method, cardholder_name, card_number, expiry_date, card_type
+            )
 
-        # Handle new card validation
+        # Handle new card scenario
         if payment_method == "new":
             form = CreditCardForm({
                 'cardholder_name': cardholder_name,
@@ -278,7 +323,9 @@ class CheckoutView(LoginRequiredMixin, View):
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, error)
-                return self.render_checkout(request, pk, delivery_address, payment_method, cardholder_name, card_number, expiry_date, card_type)
+                return self.render_checkout(
+                    request, pk, delivery_address, quantity, payment_method, cardholder_name, card_number, expiry_date, card_type
+                )
 
             # Save the new card
             card_number = form.cleaned_data['card_number']
@@ -290,28 +337,31 @@ class CheckoutView(LoginRequiredMixin, View):
                 card_type=form.cleaned_data['card_type'],
             )
         else:
-            # Ensure the selected card exists and belongs to the user
+            # Ensure the selected card exists
             try:
                 selected_card = CreditCard.objects.get(id=payment_method, user=request.user)
             except CreditCard.DoesNotExist:
                 messages.error(request, "Invalid payment method.")
-                return self.render_checkout(request, pk, delivery_address, payment_method, cardholder_name, card_number, expiry_date, card_type)
+                return self.render_checkout(
+                    request, pk, delivery_address, quantity, payment_method, cardholder_name, card_number, expiry_date, card_type
+                )
 
         # Process the order
         with transaction.atomic():
-            listing = get_object_or_404(Listing, pk=pk, sold=False)
-            self.create_order(request, listing, delivery_address, selected_card)
+            self.create_order(request, listing, quantity, delivery_address, selected_card)
 
         messages.success(request, "Order placed successfully!")
         return redirect('order_history')
 
-    def render_checkout(self, request, pk, delivery_address, payment_method, cardholder_name, card_number, expiry_date, card_type):
+    def render_checkout(self, request, pk, delivery_address, quantity, payment_method, cardholder_name, card_number, expiry_date, card_type):
         credit_cards = CreditCard.objects.filter(user=request.user)
         profile_address = request.user.profile.address
         listing = get_object_or_404(Listing, pk=pk, sold=False)
 
         return render(request, 'project/checkout.html', {
             'listing': listing,
+            'quantity': quantity,
+            'total_price': listing.price * quantity,
             'credit_cards': credit_cards,
             'profile_address': profile_address,
             'delivery_address': delivery_address,
@@ -322,18 +372,25 @@ class CheckoutView(LoginRequiredMixin, View):
             'card_type': card_type,
         })
 
-    def create_order(self, request, listing, delivery_address, selected_card):
-        # Create a new order for the listing
+    def create_order(self, request, listing, quantity, delivery_address, selected_card):
+        # Calculate total price
+        total_price = quantity * listing.price
+
+        # Create a new order
         Order.objects.create(
             buyer=request.user,
             seller=listing.user,
             listing=listing,
+            quantity=quantity,
+            total_price=total_price,
             delivery_address=delivery_address,
             status='Pending',
         )
 
-        # Mark the listing as sold
-        listing.sold = True
+        # Update the listing's quantity
+        listing.quantity -= quantity
+        if listing.quantity == 0:
+            listing.sold = True
         listing.save()
 
 
@@ -384,7 +441,7 @@ class DeleteCreditCardView(LoginRequiredMixin, View):
 class CartCheckoutView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         cart = request.user.cart  # Retrieve the user's cart
-        
+
         # Separate unsold and sold items
         unsold_items = cart.items.filter(listing__sold=False).select_related('listing')
         sold_items = cart.items.filter(listing__sold=True).select_related('listing')
@@ -393,12 +450,15 @@ class CartCheckoutView(LoginRequiredMixin, View):
         credit_cards = CreditCard.objects.filter(user=request.user)
         profile_address = request.user.profile.address
 
+        # Calculate total price for unsold items
+        total_price = sum(item.quantity * item.listing.price for item in unsold_items)
+
         return render(request, 'project/checkout_cart.html', {
             'unsold_items': unsold_items,
             'sold_items': sold_items,
             'credit_cards': credit_cards,
             'profile_address': profile_address,
-            'unsold_items_total_price': sum(item.listing.price for item in unsold_items),
+            'unsold_items_total_price': total_price,
         })
 
     def post(self, request, *args, **kwargs):
@@ -456,21 +516,51 @@ class CartCheckoutView(LoginRequiredMixin, View):
             for cart_item in unsold_items:
                 listing = cart_item.listing
 
-                # Create an order for each listing
-                Order.objects.create(
-                    buyer=request.user,
-                    seller=listing.user,
-                    listing=listing,
-                    status='Pending',
-                    delivery_address=delivery_address,
-                )
+                # Update quantity of the listing or mark as sold if fully purchased
+                if listing.quantity >= cart_item.quantity:
+                    listing.quantity -= cart_item.quantity
+                    if listing.quantity == 0:
+                        listing.sold = True
+                    listing.save()
 
-                # Mark listing as sold
-                listing.sold = True
-                listing.save()
+                    # Create an order for each listing
+                    Order.objects.create(
+                        buyer=request.user,
+                        seller=listing.user,
+                        listing=listing,
+                        quantity=cart_item.quantity,
+                        total_price=cart_item.quantity * listing.price,
+                        status='Pending',
+                        delivery_address=delivery_address,
+                    )
+                else:
+                    messages.error(request, f"Not enough quantity for '{listing.name}'.")
 
-            # Clear only unsold items from the cart
+            # Remove processed items from the cart
             unsold_items.delete()
 
         messages.success(request, "Your order has been placed successfully!")
         return redirect('order_history')
+
+
+class UpdateCartItemQuantityView(LoginRequiredMixin, View):
+    def post(self, request, item_id, *args, **kwargs):
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+
+        # Validate the new quantity
+        try:
+            new_quantity = int(request.POST.get('quantity', 1))
+        except ValueError:
+            messages.error(request, "Invalid quantity.")
+            return redirect('cart')
+
+        if new_quantity < 1 or new_quantity > cart_item.listing.quantity:
+            messages.error(request, f"Quantity must be between 1 and {cart_item.listing.quantity}.")
+            return redirect('cart')
+
+        # Update the cart item quantity
+        cart_item.quantity = new_quantity
+        cart_item.save()
+
+        messages.success(request, "Cart item quantity updated.")
+        return redirect('cart')

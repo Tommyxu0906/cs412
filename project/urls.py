@@ -28,7 +28,7 @@ urlpatterns = [
     path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('checkout/<int:pk>/', CheckoutView.as_view(), name='checkout_single'),
     path('checkout/cart/', CartCheckoutView.as_view(), name='checkout_cart'),
-
+    path('cart/item/update/<int:item_id>/', UpdateCartItemQuantityView.as_view(), name='update_cart_item_quantity'),
 ]
 
 if settings.DEBUG:

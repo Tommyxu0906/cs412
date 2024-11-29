@@ -46,13 +46,18 @@ class Order(models.Model):
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sales')
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    delivery_address = models.TextField(blank=True, null=True)  # Add this field
+    quantity = models.PositiveIntegerField(default=1)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00) 
+    delivery_address = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=50, 
         choices=[('Pending', 'Pending'), ('Paid', 'Paid'), ('Shipped', 'Shipped'), ('Delivered', 'Delivered')],
         default='Pending'
     )
+
+    def __str__(self):
+        return f"Order {self.id}: {self.listing.name} (x{self.quantity}) by {self.buyer.username}"
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
@@ -67,9 +72,16 @@ class Cart(models.Model):
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     listing = models.ForeignKey('Listing', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)  # Track quantity for the item in the cart
 
     def __str__(self):
-        return f"{self.listing.name} in {self.cart.user.username}'s cart"
+        return f"{self.listing.name} (x{self.quantity}) in {self.cart.user.username}'s cart"
+
+    @property
+    def total_price(self):
+        """Calculate the total price for this cart item."""
+        return self.listing.price * self.quantity
+
     
 class CreditCard(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='credit_cards')

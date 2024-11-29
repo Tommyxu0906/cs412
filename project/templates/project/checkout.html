@@ -12,7 +12,9 @@
             <img src="{{ listing.image.url }}" alt="{{ listing.name }}" class="listing-image">
             <div class="card-details">
                 <h3>{{ listing.name }}</h3>
-                <p>Price: ${{ listing.price }}</p>
+                <p>Price per item: ${{ listing.price }}</p>
+                <p>Quantity: {{ quantity }}</p>
+                <p>Total Price: ${{ total_price }}</p>
             </div>
         </div>
     {% else %}
@@ -49,19 +51,9 @@
             {% endfor %}
         </div>
 
-        <!-- Confirm Price -->
-        <h3>Total Price</h3>
-        {% if listing %}
-            <p>${{ listing.price }}</p>
-        {% else %}
-            <p>${{ request.user.cart.total_price }}</p>
-        {% endif %}
-
         <!-- Place Order Button -->
-        <form method="post" action="{% url 'place_order' listing.id %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">Place Order</button>
-        </form>
+        <button type="submit" class="btn btn-success">Place Order</button>
+
     </form>
 </div>
 {% endblock %}
