@@ -61,7 +61,7 @@
             <img src="{{ item.listing.image.url }}" alt="{{ item.listing.name }}" class="cart-item-image">
             <div class="cart-item-details">
                 <h4><a href="{% url 'listing_detail' item.listing.id %}" class="text-decoration-none">{{ item.listing.name }}</a></h4>
-                <p>Price: ${{ item.listing.price|floatformat:2 }}</p>
+                <p>Unit Price: ${{ item.listing.price|floatformat:2 }}</p>
                 <p>Subtotal: ${{ item.total_price|floatformat:2 }}</p>
             </div>
             <div class="cart-item-actions">

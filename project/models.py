@@ -31,8 +31,6 @@ class Listing(models.Model):
             raise ValidationError("Price cannot be negative.")
         if self.price > 99999:
             raise ValidationError("Price cannot exceed 99999.")
-        if self.quantity < 1:
-            raise ValidationError("Quantity must be at least 1.")
 
     def save(self, *args, **kwargs):
         # Call the clean method to validate the model before saving
