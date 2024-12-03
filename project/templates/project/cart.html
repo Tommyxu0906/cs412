@@ -97,6 +97,12 @@
                 <p>Item Price: ${{ item.listing.price|floatformat:2 }}</p>
                 <p>Quantity: {{ item.quantity }}</p>
             </div>
+            <div class="cart-item-actions">
+                <form method="post" action="{% url 'remove_from_cart' item.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm mt-2">Remove</button>
+                </form>
+            </div>
         </div>
         {% endfor %}
     </div>
