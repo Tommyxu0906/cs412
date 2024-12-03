@@ -47,13 +47,13 @@
     {% if listings %}
         <div class="listing-cards">
             {% for listing in listings %}
-            <a href="{% url 'listing_detail' listing.pk %}">
+            <a href="{% url 'listing_detail' listing.pk %}" class="card-link"> <!-- Wrap the card with the link -->
                 <div class="card">
-                        {% if listing.image %}
-                            <img src="{{ listing.image.url }}" alt="{{ listing.name }}" class="listing-image">
-                        {% endif %}                    
+                    {% if listing.image %}
+                        <img src="{{ listing.image.url }}" alt="{{ listing.name }}" class="listing-image">
+                    {% endif %}
                     <div class="card-details">
-                        <h3><a href="{% url 'listing_detail' listing.pk %}">{{ listing.name }}</a></h3>
+                        <h3>{{ listing.name }}</h3>
                         <p>Price: ${{ listing.price }}</p>
                         <p>Available Quantity: {{ listing.quantity }}</p>
                     </div>
@@ -64,4 +64,5 @@
     {% else %}
         <p>No listings match your search.</p>
     {% endif %}
+
 {% endblock %}
