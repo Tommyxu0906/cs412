@@ -11,6 +11,8 @@ from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import update_session_auth_hash
 
 def register(request):
     if request.method == "POST":
@@ -102,10 +104,59 @@ class ShowListingPageView(DetailView):
     template_name = 'project/listing_detail.html'  # The template for displaying a single listing
     context_object_name = 'listing'  # Use 'listing' as the variable name in the template
 
-class UserProfileView(DetailView):
+class UserProfileView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'project/profile.html'
     context_object_name = 'user'
+
+    def get_context_data(self, **kwargs):
+        # Add additional context if needed
+        context = super().get_context_data(**kwargs)
+        context['is_owner'] = self.request.user == self.get_object()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        # Only allow the user to update their own profile
+        user = self.get_object()
+        if request.user != user:
+            messages.error(request, "You are not authorized to edit this profile.")
+            return redirect('user_profile', pk=user.pk)
+
+        # Get submitted data
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        address = request.POST.get('address', '').strip()
+        username = request.POST.get('username', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        # Validate input
+        if not email:
+            messages.error(request, "Email is required.")
+            return redirect('user_profile', pk=user.pk)
+
+        if username != user.username and User.objects.filter(username=username).exists():
+            messages.error(request, "This username is already taken.")
+            return redirect('user_profile', pk=user.pk)
+
+        # Update user and profile models
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.username = username
+        if password:
+            user.password = make_password(password)
+            update_session_auth_hash(request, user)  # Keep the user logged in after password change
+        user.save()
+
+        profile = user.profile
+        profile.address = address
+        profile.phone_number = phone_number
+        profile.save()
+
+        messages.success(request, "Profile updated successfully!")
+        return redirect('user_profile', pk=user.pk)
 
 class CompleteOrderView(View):
     def post(self, request, pk, *args, **kwargs):

@@ -3,34 +3,74 @@
 {% block title %}User Profile - {{ user.username }}{% endblock %}
 
 {% block content %}
-    <div class="user-profile-container">
-        
-        <h2>{{ user.username }}'s Profile</h2>
-        <table class="user-profile-table">
-            <tr>
-                <th>Full Name</th>
-                <td>{{ user.first_name }} {{ user.last_name }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ user.email }}</td>
-            </tr>
-            <tr>
-                <th>Username</th>
-                <td>{{ user.username }}</td>
-            </tr>
-            <tr>
-                <th>Default Address</th>
-                <td>{{ user.profile.address }}</td>
-            </tr>
-            <tr>
-                <th>Date Joined</th>
-                <td>{{ user.date_joined|date:"F d, Y" }}</td>
-            </tr>
-            <tr>
-                <th>Last Login</th>
-                <td>{{ user.last_login|date:"F d, Y H:i" }}</td>
-            </tr>
-        </table>
-    </div>
+<div class="user-profile-container">
+    <h2>{{ user.username }}'s Profile</h2>
+
+    <table class="user-profile-table">
+        <tr>
+            <th>Full Name</th>
+            <td>{{ user.first_name }} {{ user.last_name }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ user.email }}</td>
+        </tr>
+        <tr>
+            <th>Username</th>
+            <td>{{ user.username }}</td>
+        </tr>
+        <tr>
+            <th>Phone Number</th>
+            <td>{{ user.profile.phone_number }}</td>
+        </tr>
+        <tr>
+            <th>Default Address</th>
+            <td>{{ user.profile.address }}</td>
+        </tr>
+        <tr>
+            <th>Date Joined</th>
+            <td>{{ user.date_joined|date:"F d, Y" }}</td>
+        </tr>
+        <tr>
+            <th>Last Login</th>
+            <td>{{ user.last_login|date:"F d, Y H:i" }}</td>
+        </tr>
+    </table>
+
+    {% if is_owner %}
+    <h3>Update Profile</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="{{ user.username }}" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="phone_number">Phone Number</label>
+            <input type="text" id="phone_number" name="phone_number" value="{{ user.profile.phone_number }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="address">Default Address</label>
+            <textarea id="address" name="address" class="form-control">{{ user.profile.address }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="password">New Password (leave blank if not changing)</label>
+            <input type="password" id="password" name="password" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Update Profile</button>
+    </form>
+    {% endif %}
+</div>
 {% endblock %}
