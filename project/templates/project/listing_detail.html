@@ -61,7 +61,7 @@
                 <div class="buy-now-container">
                     <form method="post" action="{% url 'checkout_single' listing.id %}">
                         {% csrf_token %}
-                        <label for="quantity">Quantity</label>
+                        <label for="quantity">Quantity Buy Now</label>
                         <input 
                             type="number" 
                             name="quantity" 
@@ -77,8 +77,18 @@
                     <!-- Add to Cart Form -->
                     <form method="post" action="{% url 'add_to_cart' listing.id %}" style="display:inline;">
                         {% csrf_token %}
+                        <label for="quantity">Quantity Adding to Cart</label>
+                        <input 
+                            type="number" 
+                            name="quantity" 
+                            id="quantity" 
+                            class="form-control" 
+                            min="1" 
+                            max="{{ listing.quantity }}" 
+                            value="1"
+                        >
                         <button type="submit" class="btn btn-success">Add to Cart</button>
-                    </form>
+                    </form>                    
                 </div>
             {% else %}
                 <p>Please Login or Register before buying</p>
