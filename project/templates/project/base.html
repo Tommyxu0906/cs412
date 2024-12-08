@@ -588,7 +588,6 @@ textarea.form-control {
         <h1>Project eBay</h1>
         <nav>
             <a href="/">Home</a>
-            <!-- Add more links as needed in the future -->
             {% if user.is_authenticated %}
             <p>Logged in as: {{user.username}} (<a href="{% url 'logout' %}">Logout</a>)</p>
             <a href="{% url 'create_listing' %}">Create Listing</a>
@@ -596,7 +595,6 @@ textarea.form-control {
             <a href="{% url 'manage_listings' %}">Manage My Listings</a>
             <a href="{% url 'manage_sales' %}">Manage My Sales</a>
             <a href="{% url 'manage_credit_cards' %}">Manage Credit Cards</a>
-
             {% else %}
             <a href="{% url 'login' %}">Login</a>
             <a href="{% url 'register' %}">Register</a>

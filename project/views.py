@@ -104,25 +104,32 @@ class ShowListingPageView(DetailView):
     template_name = 'project/listing_detail.html'  # The template for displaying a single listing
     context_object_name = 'listing'  # Use 'listing' as the variable name in the template
 
-class UserProfileView(LoginRequiredMixin, DetailView):
+class UserProfileView(DetailView):
     model = User
     template_name = 'project/profile.html'
     context_object_name = 'user'
 
     def get_context_data(self, **kwargs):
-        # Add additional context if needed
         context = super().get_context_data(**kwargs)
-        context['is_owner'] = self.request.user == self.get_object()
+        # Check if the logged-in user is the owner of the profile
+        context['is_owner'] = self.request.user.is_authenticated and self.request.user == self.get_object()
         return context
 
     def post(self, request, *args, **kwargs):
-        # Only allow the user to update their own profile
+        # Ensure the request user is authenticated
+        if not request.user.is_authenticated:
+            messages.error(request, "You must be logged in to update your profile.")
+            return redirect('login')
+
+        # Get the profile being accessed
         user = self.get_object()
+        
+        # Ensure the logged-in user matches the profile owner
         if request.user != user:
             messages.error(request, "You are not authorized to edit this profile.")
             return redirect('user_profile', pk=user.pk)
 
-        # Get submitted data
+        # Handle profile updates
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
@@ -131,7 +138,7 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         phone_number = request.POST.get('phone_number', '').strip()
         password = request.POST.get('password', '').strip()
 
-        # Validate input
+        # Validation checks
         if not email:
             messages.error(request, "Email is required.")
             return redirect('user_profile', pk=user.pk)
@@ -140,16 +147,17 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             messages.error(request, "This username is already taken.")
             return redirect('user_profile', pk=user.pk)
 
-        # Update user and profile models
+        # Update the user's profile
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
         user.username = username
         if password:
             user.password = make_password(password)
-            update_session_auth_hash(request, user)  # Keep the user logged in after password change
+            update_session_auth_hash(request, user)  # Only keep session for the logged-in user
         user.save()
 
+        # Update the user profile
         profile = user.profile
         profile.address = address
         profile.phone_number = phone_number

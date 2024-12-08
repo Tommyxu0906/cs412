@@ -39,37 +39,39 @@
 
     {% if is_owner %}
     <h3>Update Profile</h3>
-    <form method="post">
+    <form method="post" class="mt-4">
         {% csrf_token %}
-        <div class="form-group">
-            <label for="first_name">First Name</label>
-            <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="last_name">Last Name</label>
-            <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" class="form-control">
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" class="form-control" placeholder="First Name">
+            </div>
+            <div class="col-md-6 form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" class="form-control" placeholder="Last Name">
+            </div>
         </div>
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control" required>
+            <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control" placeholder="Email" required>
         </div>
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" value="{{ user.username }}" class="form-control" required>
+            <input type="text" id="username" name="username" value="{{ user.username }}" class="form-control" placeholder="Username" required>
         </div>
         <div class="form-group">
             <label for="phone_number">Phone Number</label>
-            <input type="text" id="phone_number" name="phone_number" value="{{ user.profile.phone_number }}" class="form-control">
+            <input type="text" id="phone_number" name="phone_number" value="{{ user.profile.phone_number }}" class="form-control" placeholder="Phone Number">
         </div>
         <div class="form-group">
             <label for="address">Default Address</label>
-            <textarea id="address" name="address" class="form-control">{{ user.profile.address }}</textarea>
+            <textarea id="address" name="address" class="form-control" placeholder="Enter your address">{{ user.profile.address }}</textarea>
         </div>
         <div class="form-group">
             <label for="password">New Password (leave blank if not changing)</label>
-            <input type="password" id="password" name="password" class="form-control">
+            <input type="password" id="password" name="password" class="form-control" placeholder="New Password">
         </div>
-        <button type="submit" class="btn btn-primary">Update Profile</button>
+        <button type="submit" class="btn btn-primary mt-3">Update Profile</button>
     </form>
     {% endif %}
 </div>
