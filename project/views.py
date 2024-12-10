@@ -14,6 +14,7 @@ from django.db import transaction
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import update_session_auth_hash
 
+# Method for handling register
 def register(request):
     if request.method == "POST":
         user_form = UserRegistrationForm(request.POST)
@@ -90,6 +91,7 @@ class ShowHomeView(View):
         })
     
 class CreateListingView(LoginRequiredMixin, CreateView):
+    #View for creating a new listing
     model = Listing
     form_class = ListingForm
     template_name = 'project/create_listing.html'
@@ -471,6 +473,7 @@ class UpdateOrderStatusView(LoginRequiredMixin, View):
         return redirect(next_url)
     
 class ManageCreditCardsView(LoginRequiredMixin, View):
+    #Handles adding, deleting credit cards
     def get(self, request, *args, **kwargs):
         cards = CreditCard.objects.filter(user=request.user)
         form = CreditCardForm()

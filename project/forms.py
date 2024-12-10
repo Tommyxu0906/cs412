@@ -5,6 +5,7 @@ from datetime import datetime
 
 
 class UserRegistrationForm(forms.ModelForm):
+    #Form handling user registration
     password = forms.CharField(widget=forms.PasswordInput, label="Password")
     confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
 
@@ -21,11 +22,13 @@ class UserRegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Passwords do not match!")
 
 class ProfileForm(forms.ModelForm):
+    #Form for updating profile info
     class Meta:
         model = Profile
         fields = ['address', 'phone_number', 'profile_image']
 
 class ListingForm(forms.ModelForm):
+    #Form to create new listing
     class Meta:
         model = Listing
         fields = ['name', 'description', 'price', 'image', 'category', 'expires_at', 'quantity']
@@ -46,6 +49,7 @@ class ListingForm(forms.ModelForm):
 
 
 class CreditCardForm(forms.Form):
+    #Form to add credit card
     cardholder_name = forms.CharField(
         label='Cardholder Name',
         max_length=100,
